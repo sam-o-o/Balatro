@@ -10,6 +10,7 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("bg", "/assets/bg.jpg") // Game backgound image
         this.load.image("title_bg", "/assets/title_bg.webp") // Title background image
         this.load.image("title_text", "/assets/title_text.png") // Title text image
+        this.load.image("click_to_start", "/assets/clickToStart.png") // Title click to start
 
         for (let i = 1; i <= 13; i++){ // All playing card images
             this.load.image(`card_hearts_${i}`, `/assets/playing_cards/Hearts_${i}.png`)
