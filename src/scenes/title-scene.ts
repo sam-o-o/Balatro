@@ -13,7 +13,26 @@ export class Titlescene extends Phaser.Scene {
         const txt = this.add.image(sizes.width / 2, 300, "title_text")
         txt.setScale(0.6)
 
-        bg.setInteractive()
-        bg.on("pointerdown", () => this.scene.start(scene_keys.gameboard))
+        const click_to_start = this.add.image(this.scale.width / 2, 700, "click_to_start")
+
+        this.tweens.add({
+            targets: click_to_start,
+            alpha: {
+                start: 1,
+                from: 1,
+                to: 0,
+            },
+            duration: 1000,
+            repeat: -1,
+            yoyo: true,
+        })
+        this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {
+            this.cameras.main.fadeOut(500, 0, 0, 0, (camera: Phaser.Cameras.Scene2D.Camera, progress: number) => {
+                if (progress !== 1) {
+                    return;
+                }
+                this.scene.start(scene_keys.gameboard)
+            })
+        })
     }
 }
