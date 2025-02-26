@@ -4,7 +4,7 @@ import { scene_keys, sizes } from './common'
 type Card = {
     image: Phaser.GameObjects.Image
     id: string
-    value: string
+    value: integer
     suit: string
 }
 
@@ -26,9 +26,9 @@ export class GameScene extends Phaser.Scene {
     // Create the starting hand
     create_card_slots() {
         const numSlots = 7  // Number of slots
-        const slotSpacing = 110  // Space between slots
+        const slotSpacing = 130  // Space between slots
         const startX = (sizes.width - (slotSpacing * (numSlots - 1))) / 2  // Center slots
-        const slotY = sizes.height - 80  // Position near bottom
+        const slotY = sizes.height - 200  // Position near bottom
 
         // Clear existing card slots and cards
         this.cardSlots = []
@@ -45,14 +45,22 @@ export class GameScene extends Phaser.Scene {
 
             // Adding cards to slots
             const cardImage = this.add.image(x, y, "card_hearts_10").setOrigin(0.5, 0.5)
-            cardImage.setScale(3)  // Card size
+            cardImage.setScale(3.5)  // Card size
 
             // Create a Card object and push it to the `cards` array
             const card: Card = {
                 image: cardImage,
                 id: `card_${i}`,  // Can be changed for unique identifiers
-                value: "8",  // Example value, can be dynamically set
+                value: 8,  // Example value, can be dynamically set
                 suit: "Clubs",  // Example suit, can be dynamically set
+            }
+
+            if (i == 2){
+                const cardImage = this.add.image(x + 35, y + 150, "play_hand_button")
+                cardImage.setScale(0.5)
+            }else if (i == 4){
+                const cardImage = this.add.image(x - 35, y + 150, "discard_button")
+                cardImage.setScale(0.5)
             }
 
             this.cards.push(card)
