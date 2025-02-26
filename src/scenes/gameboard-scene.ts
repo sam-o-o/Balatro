@@ -1,17 +1,11 @@
 import Phaser from 'phaser'
-import { scene_keys } from './common'
+import { scene_keys, sizes } from './common'
 
 type Card = {
     image: Phaser.GameObjects.Image
     id: string
     value: string
     suit: string
-}
-
-const sizes = {
-    width: 1000,
-    height: 800,
-    left_width: 300,
 }
 
 export class GameScene extends Phaser.Scene {
