@@ -22,11 +22,17 @@ export class Titlescene extends Phaser.Scene {
                 from: 1,
                 to: 0,
             },
-            duration: 1500,
+            duration: 1000,
             repeat: -1,
+            yoyo: true,
         })
         this.input.once(Phaser.Input.Events.POINTER_DOWN, () => {
-            this.scene.start(scene_keys.gameboard)
+            this.cameras.main.fadeOut(500, 0, 0, 0, (camera: Phaser.Cameras.Scene2D.Camera, progress: number) => {
+                if (progress !== 1) {
+                    return;
+                }
+                this.scene.start(scene_keys.gameboard)
+            })
         })
     }
 }
