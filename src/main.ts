@@ -12,6 +12,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     width: sizes.width,
     height: sizes.height,
+    pixelArt: true,
     canvas: gameCanvas,
     scene: [PreloadScene, Titlescene, GameScene, LeftPanelScene]
 }
