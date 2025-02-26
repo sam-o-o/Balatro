@@ -1,0 +1,25 @@
+import Phaser from 'phaser'
+import { scene_keys } from './common'
+
+export class PreloadScene extends Phaser.Scene {
+    constructor() {
+        super({ key: scene_keys.preload })
+    }
+
+    public preload(): void {
+        this.load.image("bg", "/assets/bg.jpg") // Game backgound image
+        this.load.image("title_bg", "/assets/title_bg.webp") // Title background image
+        this.load.image("title_text", "/assets/title_text.png") // Title text image
+
+        for (let i = 1; i <= 13; i++){ // All playing card images
+            this.load.image(`card_hearts_${i}`, `/assets/playing_cards/Hearts_${i}.png`)
+            this.load.image(`card_ spades_${i}`, `/assets/playing_cards/Spades_${i}.png`)
+            this.load.image(`card_diamonds_${i}`, `/assets/playing_cards/Diamonds_${i}.png`)
+            this.load.image(`card_clubs_${i}`, `/assets/playing_cards/Clubs_${i}.png`)
+        }
+    }
+
+    public create(): void {
+        this.scene.start(scene_keys.title)
+    }
+}

@@ -1,37 +1,21 @@
 import './style.css'
 import Phaser from 'phaser'
+import { PreloadScene } from './scenes/preload-scene'
+import { Titlescene } from './scenes/title-scene'
+import { GameScene } from './scenes/gameboard-scene'
+import { LeftPanelScene } from './scenes/leftpanel-scene'
+import { sizes } from './scenes/common'
 
-const sizes = {
-    width: 900,
-    height: 600
-}
+const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement
 
-class GameScene extends Phaser.Scene{
-    constructor(){
-        super("scene-game")
-    }
-
-    preload(){
-        this.load.image("bg", "/assets/bg.jpg")
-        this.load.image("all", "/assets/playing_cards/All.png")
-    }
-
-    create(){
-        this.add.image(0, 0, "bg").setOrigin(0, 0)
-        this.add.image(800, 500, "all").setOrigin(0, 0)
-    }
-
-    update(){}
-}
-
-const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
-
-const config = {
-    type:Phaser.WEBGL,
+const gameConfig: Phaser.Types.Core.GameConfig = {
+    type: Phaser.WEBGL,
     width: sizes.width,
     height: sizes.height,
     canvas: gameCanvas,
-    scene:[GameScene]
+    scene: [PreloadScene, Titlescene, GameScene, LeftPanelScene]
 }
 
-const game = new Phaser.Game(config)
+window.onload = () => {
+    new Phaser.Game(gameConfig)
+}
