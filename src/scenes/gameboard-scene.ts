@@ -1,8 +1,11 @@
 import Phaser from 'phaser'
-import { scene_keys, sizes } from './common'
+import { scene_keys, sizes, deck } from './common'
+import { empty, push, top, pop, Stack, NonEmptyStack } from '../lib/stack.ts'
 
 export class GameScene extends Phaser.Scene {
-    private cardSlots: { x: number; y: number }[] = []
+    private card_slots: { x: number; y: number }[] = []
+    private shuffled_deck = empty<number>() as NonEmptyStack<number>;
+    private takencards: Array<number> = []
 
     constructor() {
         super({ key: scene_keys.gameboard })
@@ -11,8 +14,9 @@ export class GameScene extends Phaser.Scene {
     create() {
         const bg = this.add.image(0, 0, "bg").setOrigin(0, 0)
         bg.setDisplaySize(sizes.width, sizes.height)
-
+        this.shuffle_cards()
         this.create_card_slots()
+        
         this.create_hand_buttons()
     }
 
@@ -40,8 +44,21 @@ export class GameScene extends Phaser.Scene {
             this.cardSlots.push({ x, y })  // Adding the position
 
             // Adding cards to slots
-            //const cardImage = this.add.image(x, y, "card_hearts_10").setOrigin(0.5, 0.5)
+            //let card = top(this.shuffled_deck)
+            //const cardImage = this.add.image(x, y, deck[card].id).setOrigin(0.5, 0.5)
             //cardImage.setScale(3)  // Card size
+            //this.shuffled_deck = pop(this.shuffled_deck) as NonEmptyStack<number>;
+        }
+    }
+    
+    //Shuffles your deck
+    shuffle_cards(): void {
+        while (this.takencards.length !== deck.length) {
+            let card = Math.floor(Math.random() * (deck.length - 1))
+            if (!this.takencards.includes(card)) {
+                this.takencards.push(card);
+                this.shuffled_deck = push(card, this.shuffled_deck)
+            }
         }
     }
 
