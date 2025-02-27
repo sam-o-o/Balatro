@@ -1,11 +1,9 @@
 import Phaser from 'phaser'
-import { scene_keys, sizes, deck } from './common'
-import { empty, push, top, pop, Stack, NonEmptyStack } from '../lib/stack.ts'
+import { scene_keys, sizes, deck, Card } from './common'
+import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from '../lib/stack.ts'
 
 export class GameScene extends Phaser.Scene {
     private card_slots: { x: number; y: number }[] = []
-    private shuffled_deck = empty<number>() as NonEmptyStack<number>;
-    private takencards: Array<number> = []
 
     constructor() {
         super({ key: scene_keys.gameboard })
@@ -14,10 +12,29 @@ export class GameScene extends Phaser.Scene {
     create() {
         const bg = this.add.image(0, 0, "bg").setOrigin(0, 0)
         bg.setDisplaySize(sizes.width, sizes.height)
-        this.shuffle_cards()
-        this.create_card_slots()
+
+        const shuffled_cards = this.shuffle_cards(deck)
+        
+        this.create_card_slots(shuffled_cards)
         this.create_hand_buttons()
     }
+
+
+    //Shuffles your deck
+    shuffle_cards(arr: Card[]): Stack<Card> {
+        const takencards: Array<number> = []
+        let stack: Stack<Card> = empty<Card>()
+
+        while (takencards.length !== deck.length) {
+            let card = Math.floor(Math.random() * (deck.length))
+            if (!takencards.includes(card)) {
+                takencards.push(card);
+                stack = push(arr[card], stack)
+            }
+        }
+        return stack;
+    }
+
 
     private numSlots = 7  // Number of slots
     private slotSpacing = 110  // Space between slots
@@ -25,7 +42,7 @@ export class GameScene extends Phaser.Scene {
     private startX = this.left_side_offset + (sizes.width - (this.slotSpacing * (this.numSlots - 1))) / 2  // Center slots
     private slotY = sizes.height - 200  // Position near bottom
     // Create the starting hand
-    create_card_slots(): void {
+    create_card_slots(shuffled_deck: Stack<Card>): void {
 
         // Clear existing card slots and cards
         this.card_slots = []
@@ -41,23 +58,16 @@ export class GameScene extends Phaser.Scene {
             this.card_slots.push({ x, y })  // Adding the position
 
             // Adding cards to slots
-            //let card = top(this.shuffled_deck)
-            //const cardImage = this.add.image(x, y, deck[card].id).setOrigin(0.5, 0.5)
-            //cardImage.setScale(3)  // Card size
-            //this.shuffled_deck = pop(this.shuffled_deck) as NonEmptyStack<number>;
+            if(!is_empty(shuffled_deck)){
+                let card = top(shuffled_deck)
+                const cardImage = this.add.image(x, y, card.id).setOrigin(0.5, 0.5)
+                cardImage.setScale(3)  // Card size
+                shuffled_deck = pop(shuffled_deck);
+            }
+            
         }
     }
     
-    //Shuffles your deck
-    shuffle_cards(): void {
-        while (this.takencards.length !== deck.length) {
-            let card = Math.floor(Math.random() * (deck.length - 1))
-            if (!this.takencards.includes(card)) {
-                this.takencards.push(card);
-                this.shuffled_deck = push(card, this.shuffled_deck)
-            }
-        }
-    }
 
     create_hand_buttons(): void {
         for (let i = 0; i < this.numSlots; i++) {
