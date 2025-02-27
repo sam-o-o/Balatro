@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
-import { scene_keys, sizes, Card } from './common'
+import { scene_keys, sizes, deck } from './common'
+import { empty, push, top, pop } from '../lib/stack.ts'
 
 export class GameScene extends Phaser.Scene {
-    private cards: Card[] = []
-    private cardSlots: { x: number; y: number }[] = []
+    private card_slots: { x: number; y: number }[] = []
+    private hand_stack = empty();
+    private takencards: Array<number> = [];
 
     constructor() {
         super({ key: scene_keys.gameboard })
@@ -14,38 +16,60 @@ export class GameScene extends Phaser.Scene {
         bg.setDisplaySize(sizes.width, sizes.height)
 
         this.create_card_slots()
+        this.create_hand_buttons()
     }
 
+    private numSlots = 7  // Number of slots
+    private slotSpacing = 110  // Space between slots
+    private left_side_offset = 120
+    private startX = this.left_side_offset + (sizes.width - (this.slotSpacing * (this.numSlots - 1))) / 2  // Center slots
+    private slotY = sizes.height - 200  // Position near bottom
     // Create the starting hand
-    create_card_slots() {
-        const numSlots = 7  // Number of slots
-        const slotSpacing = 130  // Space between slots
-        const startX = (sizes.width - (slotSpacing * (numSlots - 1))) / 2  // Center slots
-        const slotY = sizes.height - 200  // Position near bottom
+    create_card_slots(): void {
 
         // Clear existing card slots and cards
-        this.cardSlots = []
-        this.cards = []
+        this.card_slots = []
 
-        for (let i = 0; i < numSlots; i++) {
-            const x = startX + i * slotSpacing
-            const y = slotY
+        for (let i = 0; i < this.numSlots; i++) {
+            const x = this.startX + i * this.slotSpacing
+            const y = this.slotY
 
             // Optional: Add a visual representation of the slots
             const slot = this.add.rectangle(x, y, 100, 150, 0xffffff, 0.3)
             slot.setStrokeStyle(2, 0x000000)  // Outline
-            this.cardSlots.push({ x, y })  // Adding the position
+            slot.setScale(1.06)
+            this.card_slots.push({ x, y })  // Adding the position
 
             // Adding cards to slots
-            const cardImage = this.add.image(x, y, "card_hearts_10").setOrigin(0.5, 0.5)
-            cardImage.setScale(3.5)  // Card size
+            //const cardImage = this.add.image(x, y, "card_hearts_10").setOrigin(0.5, 0.5)
+            //cardImage.setScale(3)  // Card size
+        }
+    }
 
-            // Create a Card object and push it to the `cards` array
-            const card: Card = {
-                id: `card_${i}`,  // Can be changed for unique identifiers
-                value: 8,  // Example value, can be dynamically set
-                suit: "Clubs",  // Example suit, can be dynamically set
+    //Gives you a hand with 7 cards 
+    // (Needs to be modified incase a player discards less cards)
+    get_hand(): void {
+        for(let i = 0; i < this.numSlots; i++) {
+            let card = this.randomize_card()
+            this.hand_stack?.push(card);
+        }
+    }
+    
+    //Gives you a random card, without duplicates
+    randomize_card(): number {
+        while (true) {
+            let card = Math.floor(Math.random() * 51);
+            if (!this.takencards.includes(card)) {
+                this.takencards.push(card);
+                return card;
             }
+        }
+    }
+
+    create_hand_buttons(): void {
+        for (let i = 0; i < this.numSlots; i++) {
+            const x = this.startX + i * this.slotSpacing
+            const y = this.slotY
 
             if (i == 2){
                 const cardImage = this.add.image(x + 35, y + 150, "play_hand_button")
@@ -54,8 +78,6 @@ export class GameScene extends Phaser.Scene {
                 const cardImage = this.add.image(x - 35, y + 150, "discard_button")
                 cardImage.setScale(0.5)
             }
-
-            this.cards.push(card)
         }
     }
 }

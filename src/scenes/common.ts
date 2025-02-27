@@ -2,7 +2,6 @@ export const scene_keys = {
     title: 'title',
     preload: 'preload',
     gameboard: 'gameboard',
-    leftpanel: 'leftpanel'
 } as const
 
 export const sizes = {

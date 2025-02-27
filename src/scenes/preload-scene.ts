@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { scene_keys, deck} from './common'
+import { scene_keys, deck } from './common'
 
 export class PreloadScene extends Phaser.Scene {
     constructor() {
