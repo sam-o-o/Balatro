@@ -3,7 +3,7 @@ import { scene_keys, sizes } from './common'
 
 export class GameScene extends Phaser.Scene {
     private cardSlots: { x: number; y: number }[] = []
-
+    
     constructor() {
         super({ key: scene_keys.gameboard })
     }
@@ -14,6 +14,7 @@ export class GameScene extends Phaser.Scene {
 
         this.create_card_slots()
         this.create_hand_buttons()
+        this.create_left_panel()
     }
 
     private numSlots = 7  // Number of slots
@@ -24,8 +25,6 @@ export class GameScene extends Phaser.Scene {
     
     // Create the starting hand
     create_card_slots(): void {
-        
-
         // Clear existing card slots and cards
         this.cardSlots = []
 
@@ -58,5 +57,11 @@ export class GameScene extends Phaser.Scene {
                 cardImage.setScale(0.5)
             }
         }
+    }
+
+    create_left_panel(): void {
+        const slot = this.add.rectangle(100, 100, 100, sizes.height, 0xffffff, 1).setOrigin()
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        slot.setScale(1.06)
     }
 }
