@@ -16,13 +16,12 @@ export class GameScene extends Phaser.Scene {
         this.create_hand_buttons()
     }
 
-
-
     private numSlots = 7  // Number of slots
     private slotSpacing = 110  // Space between slots
     private left_side_offset = 120
     private startX = this.left_side_offset + (sizes.width - (this.slotSpacing * (this.numSlots - 1))) / 2  // Center slots
     private slotY = sizes.height - 200  // Position near bottom
+    
     // Create the starting hand
     create_card_slots(): void {
         
