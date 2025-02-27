@@ -1,12 +1,5 @@
 import Phaser from 'phaser'
-import { scene_keys, sizes } from './common'
-
-type Card = {
-    image: Phaser.GameObjects.Image
-    id: string
-    value: integer
-    suit: string
-}
+import { scene_keys, sizes, Card } from './common'
 
 export class GameScene extends Phaser.Scene {
     private cards: Card[] = []
@@ -49,7 +42,6 @@ export class GameScene extends Phaser.Scene {
 
             // Create a Card object and push it to the `cards` array
             const card: Card = {
-                image: cardImage,
                 id: `card_${i}`,  // Can be changed for unique identifiers
                 value: 8,  // Example value, can be dynamically set
                 suit: "Clubs",  // Example suit, can be dynamically set
