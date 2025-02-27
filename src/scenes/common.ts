@@ -2,7 +2,6 @@ export const scene_keys = {
     title: 'title',
     preload: 'preload',
     gameboard: 'gameboard',
-    leftpanel: 'leftpanel'
 } as const
 
 export const sizes = {
@@ -10,3 +9,11 @@ export const sizes = {
     height: 900,
     left_width: 300,
 } as const
+
+export type Card = {
+    id: string
+    value: integer
+    suit: string
+}
+
+export let deck: Array<Card> = [];
