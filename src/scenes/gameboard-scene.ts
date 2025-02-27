@@ -1,8 +1,6 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes } from './common'
 
-const a:number = 34;
-
 export class GameScene extends Phaser.Scene {
     private cardSlots: { x: number; y: number }[] = []
 
