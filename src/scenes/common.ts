@@ -13,9 +13,15 @@ export const sizes = {
 } as const
 
 export type Card = {
-    id: string
-    value: integer
-    suit: string
+    image: string,
+    id: number,
+    value: integer,
+    suit: string,
+    chip_flat: number,
+    chip_factor: number,
+    mult_flat: number,
+    mult_factor: number
+
 }
 
 export let deck: Array<Card> = [];
