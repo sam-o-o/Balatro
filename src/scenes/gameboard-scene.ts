@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes, deck, Card } from './common'
 import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from '../lib/stack.ts'
+import { shuffle_cards } from '../lib/balatro_functions.ts'
 
 export class GameScene extends Phaser.Scene {
     private card_slots: { x: number; y: number }[] = []
@@ -13,28 +14,11 @@ export class GameScene extends Phaser.Scene {
         const bg = this.add.image(0, 0, "bg").setOrigin(0, 0)
         bg.setDisplaySize(sizes.width, sizes.height)
 
-        const shuffled_cards = this.shuffle_cards(deck)
+        const shuffled_cards = shuffle_cards(deck)
         
         this.create_card_slots(shuffled_cards)
         this.create_hand_buttons()
     }
-
-
-    //Shuffles your deck
-    shuffle_cards(arr: Card[]): Stack<Card> {
-        const takencards: Array<number> = []
-        let stack: Stack<Card> = empty<Card>()
-
-        while (takencards.length !== deck.length) {
-            let card = Math.floor(Math.random() * (deck.length))
-            if (!takencards.includes(card)) {
-                takencards.push(card);
-                stack = push(arr[card], stack)
-            }
-        }
-        return stack;
-    }
-
 
     private numSlots = 7  // Number of slots
     private slotSpacing = 110  // Space between slots
