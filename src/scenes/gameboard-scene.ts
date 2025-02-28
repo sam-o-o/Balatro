@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes, deck, Card } from './common'
-import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from '../lib/stack.ts'
+import { empty, push, top, pop, Stack, is_empty } from '../lib/stack.ts'
 
 export class GameScene extends Phaser.Scene {
     private card_slots: { x: number; y: number }[] = []
