@@ -8,6 +8,8 @@ export const sizes = {
     width: 1400,
     height: 900,
     left_width: 300,
+    card_height: 159,
+    card_width: 106
 } as const
 
 export type Card = {

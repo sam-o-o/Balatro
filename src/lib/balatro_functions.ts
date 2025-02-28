@@ -1,13 +1,20 @@
+import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack.ts'
 import { scene_keys, sizes, deck, Card } from '../scenes/common'
     
-/**
- * Takes a deck and shuffles it
- * @example
- * @param {Array} arr - Array of cards
- * @returns {Stack} a stack of cards
- */
-export function shuffle_cards(arr: Array<Card>): Stack<Card> {
+let card_slots: Array<{ x: number; y: number }> = []
+
+const numSlots = 7  // Number of slots
+const panel_width = 350
+const slotSpacing = 110  // Space between slots
+const left_side_offset = 30
+const startX = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
+const slotY = sizes.height - 200  // Position near bottom
+
+
+
+//Shuffles your deck
+export function shuffle_cards(arr: Card[]): Stack<Card> {
     const takencards: Array<number> = []
     let stack: Stack<Card> = empty<Card>()
 
@@ -20,35 +27,39 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
     }
     return stack;
 }
-/**
- * 
- * @param arr 
- */
-export function calculate_hand(arr: Array<Card> ): Array<number> {
-    switch(arr.length) {
-        case 1: {
 
-            break
-        }
+export function create_card_slots(scene: Phaser.Scene): void {
 
-        case 2: {
+    // Clear existing card slots and cards
+    card_slots = []
+    
+    for (let i = 0; i < numSlots; i++) {
+        const x = startX + i * slotSpacing
+        const y = slotY
 
-            break
-        }
+        // Optional: Add a visual representation of the slots
+        const slot = scene.add.rectangle(x, y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        card_slots.push({ x, y })  // Adding the position
+    }
+}
 
-        case 3: {
+export function create_hand_buttons(scene: Phaser.Scene): void {
+    for (let i = 0; i < numSlots; i++) {
+        const x = startX + i * slotSpacing
+        const y = slotY
 
-            break
-        }
-
-        case 4: {
-
-            break
-        }
-
-        case 5: {
-            
-            break
+        if (i == 2){
+            const cardImage = scene.add.image(x + 35, y + 150, "play_hand_button")
+            cardImage.setScale(0.5)
+        }else if (i == 4){
+            const cardImage = scene.add.image(x - 35, y + 150, "discard_button")
+            cardImage.setScale(0.5)
         }
     }
+}
+
+export function create_left_panel(scene: Phaser.Scene) {
+    const panel = scene.add.rectangle(left_side_offset, 0, panel_width, sizes.height, 0x000000, 0.9).setOrigin(0, 0)
+    panel.setStrokeStyle(2, 0x000000)  // Outline
 }
