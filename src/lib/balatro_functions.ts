@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack.ts'
+import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack'
 import { scene_keys, sizes, deck, Card } from '../scenes/common'
     
 let card_slots: Array<{ x: number; y: number }> = []
@@ -11,10 +11,13 @@ const left_side_offset = 30
 const startX = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
 const slotY = sizes.height - 200  // Position near bottom
 
-
-
-//Shuffles your deck
-export function shuffle_cards(arr: Card[]): Stack<Card> {
+/**
+ * Takes a deck and shuffles it
+ * @example
+ * @param {Array} arr - Array of cards
+ * @returns {Stack} a stack of cards
+ */
+export function shuffle_cards(arr: Array<Card>): Stack<Card> {
     const takencards: Array<number> = []
     let stack: Stack<Card> = empty<Card>()
 
@@ -70,7 +73,7 @@ export function calculate_hand(arr: Array<Card> ): Array<number> {
         }
         return [chip_tot + 30, mult_tot + 3]
     } else if (poker_hand === "two pair") {
-        
+
     } else if (poker_hand === "pair") {
         let value = Number(Object.keys(valueCounts)[values.indexOf(2)])
         let chip_tot: number = 0, mult_tot: number = 0
@@ -85,7 +88,6 @@ export function calculate_hand(arr: Array<Card> ): Array<number> {
         return [arr[0].chip + 5, arr[0].mult + 1]
     }
 }
-
 
 export function get_poker_hand(cards: Array<Card>): string {
     if (cards.length === 1) return "high card";
@@ -112,6 +114,16 @@ export function get_poker_hand(cards: Array<Card>): string {
     return "high card"; // If no other hand type is matched
   }
 
+  const hand: Array<Card> = [
+    { id: "1", value: 10, suit: "hearts" },
+    { id: "2", value: 11, suit: "hearts" },
+    { id: "3", value: 12, suit: "hearts" },
+    { id: "4", value: 13, suit: "hearts" },
+    { id: "5", value: 14, suit: "hearts" }
+  ];
+  
+  console.log(get_poker_hand(hand)); // "Royal Flush"
+  
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
