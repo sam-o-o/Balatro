@@ -31,7 +31,7 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
 
     return stack;
 }
-
+//Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
@@ -49,11 +49,14 @@ export function create_card_slots(scene: Phaser.Scene): void {
         let stack  = shuffle_cards(deck)
 
         if(!is_empty(stack)) {
-            const hand = [] 
-            hand.push(top(stack))
-            const card = scene.add.image(x, y, top(stack).id)
+            const card = top(stack)
+            const card_display = scene.add.image(x, y, card.image)
+            card_display.setInteractive()
+            card_display.on('pointerdown', function() {
+                console.log(card.id)
+            })
             stack = pop(stack)
-            card.setScale(3)
+            card_display.setScale(3)
         }
     }
 }
