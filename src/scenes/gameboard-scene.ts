@@ -6,7 +6,7 @@ export class GameScene extends Phaser.Scene {
     private card_slots: { x: number; y: number }[] = []
     private shuffled_deck = empty<number>() as NonEmptyStack<number>;
     private takencards: Array<number> = []
->>>>>>>>> Temporary merge branch 2
+
 
     constructor() {
         super({ key: scene_keys.gameboard })
