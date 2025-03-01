@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes, deck, Card } from './common'
 import { create_card_slots, create_hand_buttons, create_left_panel, shuffle_cards } from '../lib/balatro_functions'
+import { empty, push, top, pop, Stack, is_empty } from '../lib/stack.ts'
 
 export class GameScene extends Phaser.Scene {
 
