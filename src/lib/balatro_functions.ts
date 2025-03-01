@@ -115,15 +115,8 @@ export function get_poker_hand(cards: Array<Card>): string {
     return "high card"; // If no other hand type is matched
   }
 
-  const hand: Array<Card> = [
-    { id: "1", value: 10, suit: "hearts" },
-    { id: "2", value: 11, suit: "hearts" },
-    { id: "3", value: 12, suit: "hearts" },
-    { id: "4", value: 13, suit: "hearts" },
-    { id: "5", value: 14, suit: "hearts" }
-  ];
-  
-  console.log(get_poker_hand(hand)); // "Royal Flush"
+
+
   
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {

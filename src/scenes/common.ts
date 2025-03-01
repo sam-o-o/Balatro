@@ -25,11 +25,3 @@ export type Card = {
 }
 
 export let deck: Array<Card> = [];
-
-export let hand: Array<Card> = [
-    { id: "1", value: 10, suit: "hearts" },
-    { id: "2", value: 11, suit: "hearts" },
-    { id: "3", value: 12, suit: "hearts" },
-    { id: "4", value: 13, suit: "hearts" },
-    { id: "5", value: 14, suit: "hearts" }
-  ];

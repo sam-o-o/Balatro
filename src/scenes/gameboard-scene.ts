@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import {empty, push, top, pop, Stack, NonEmptyStack, is_empty }  from '../lib/stack'
 import { scene_keys, sizes, deck, Card } from './common'
 import { create_card_slots, create_hand_buttons, create_left_panel, shuffle_cards } from '../lib/balatro_functions'
 
