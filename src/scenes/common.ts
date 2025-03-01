@@ -8,8 +8,8 @@ export const sizes = {
     width: 1400,
     height: 900,
     left_width: 300,
-    card_height: 159,
-    card_width: 106
+    card_width: 115,
+    card_height: 115 * 1.405405405
 } as const
 
 let id: number = 1
@@ -55,6 +55,14 @@ export type Card = {
     chip_factor: number,
     mult_flat: number,
     mult_factor: number,
+}
+
+export type CardSlot = {
+    card: Card | null,
+    selected: boolean,
+    disabled: boolean,
+    x: integer,
+    y: integer
 }
 
 export let deck: Array<Card> = [];

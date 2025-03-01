@@ -1,17 +1,16 @@
 import Phaser from 'phaser'
-import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack'
-import { scene_keys, sizes, deck, Card, Suit } from '../scenes/common'
+import { empty, push, top, pop, Stack, is_empty } from './stack'
+import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
     
-let card_slots: Array<{ x: number; y: number }> = []
+let card_slots: Array<CardSlot> = []
 
 const numSlots: number = 7 // Number of slots
-const panel_width: number = 350
-const slotSpacing: number = 110  // Space between slots
-const left_side_offset: number = 40
+const panel_width: number = 330
+const slotSpacing: number = 120  // Space between slots
+const left_side_offset: number = 25
 const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
-
 
 
 //Shuffles your deck
@@ -117,35 +116,52 @@ export function get_poker_hand(cards: Array<Card>): string {
     if (counts[0] === 2) return "pair";
   
     return "high card"; // If no other hand type is matched
-  }
+}
 
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
-    card_slots = []
     let stack  = shuffle_cards(deck)
 
     for (let i = 0; i < numSlots; i++) {
         const x = startX + i * slotSpacing
         const y = slotY
+        let card_slot: CardSlot = {
+            card: null,
+            selected: false,
+            disabled: false,
+            x: x,
+            y: y
+        }
 
         // Optional: Add a visual representation of the slots
-        const slot = scene.add.rectangle(x, y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
         slot.setStrokeStyle(2, 0x000000)  // Outline
-        card_slots.push({ x, y })  // Adding the position
+        card_slots.push(card_slot)  // Adding the position
 
         
 
         if(!is_empty(stack)) {
             const card: Card = top(stack)
-            const card_display = scene.add.image(x, y, card.image)
+            const card_display = scene.add.image(card_slot.x, card_slot.y, card.image)
             card_display.setInteractive()
             card_display.on('pointerdown', function() {
-                card_display.setPosition(card_display.x, card_display.y - 50)
+                let numSelectedSlots : number = card_slots.filter(slot => slot.selected).length
+
+                if(!card_slot.selected) {
+                    if(numSelectedSlots < 5){
+                        card_display.setPosition(card_slot.x, card_slot.y - 30)
+                        card_slot.selected = true
+                    }
+                }
+                else {
+                    card_display.setPosition(card_slot.x, card_slot.y)
+                    card_slot.selected = false
+                }
             })
             stack = pop(stack)
-            card_display.setScale(3)
+            card_display.setDisplaySize(sizes.card_width, sizes.card_height)
         }
     }
 }
@@ -155,10 +171,10 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
         const x = startX + i * slotSpacing
         const y = slotY
 
-        if (i == 2){
+        if (i === 2){
             const cardImage = scene.add.image(x + 35, y + 150, "play_hand_button")
             cardImage.setScale(0.5)
-        }else if (i == 4){
+        }else if (i === 4){
             const cardImage = scene.add.image(x - 35, y + 150, "discard_button")
             cardImage.setScale(0.5)
         }
