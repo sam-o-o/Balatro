@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack'
-import { scene_keys, sizes, deck, Card } from '../scenes/common'
+import { scene_keys, sizes, deck, Card, Suit } from '../scenes/common'
     
 let card_slots: Array<{ x: number; y: number }> = []
 
@@ -98,7 +98,7 @@ export function get_poker_hand(cards: Array<Card>): string {
     if (cards.length === 1) return "high card";
   
     const values: Array<number> = cards.map(card => card.value).sort((a, b) => a - b);
-    const suits: Array<string> = cards.map(card => card.suit);
+    const suits: Array<Suit> = cards.map(card => card.suit);
 
     const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
     const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
