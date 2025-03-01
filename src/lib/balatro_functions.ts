@@ -12,6 +12,8 @@ const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 
+
+
 //Shuffles your deck
 export function shuffle_cards(arr: Array<Card>): Stack<Card> {
     // Create a copy of the array to preserve the original
@@ -23,20 +25,24 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
         [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Swap elements
     }
 
+
     // Convert the shuffled array to a stack and return it
     let stack: Stack<Card> = empty<Card>();
     shuffledArray.forEach(card => {
         stack = push(card, stack);
     });
 
+
     return stack;
 }
+
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
     card_slots = []
-    
+    let stack  = shuffle_cards(deck)
+
     for (let i = 0; i < numSlots; i++) {
         const x = startX + i * slotSpacing
         const y = slotY
@@ -46,14 +52,14 @@ export function create_card_slots(scene: Phaser.Scene): void {
         slot.setStrokeStyle(2, 0x000000)  // Outline
         card_slots.push({ x, y })  // Adding the position
 
-        let stack  = shuffle_cards(deck)
+        
 
         if(!is_empty(stack)) {
-            const card = top(stack)
+            const card: Card = top(stack)
             const card_display = scene.add.image(x, y, card.image)
             card_display.setInteractive()
             card_display.on('pointerdown', function() {
-                console.log(card.id)
+                card_display.setPosition(card_display.x, card_display.y - 50)
             })
             stack = pop(stack)
             card_display.setScale(3)
@@ -102,15 +108,17 @@ export function create_left_panel(scene: Phaser.Scene) {
         .setOrigin(0, 0) // Set origin to top-left corner
 
     // Draw level display box
+
+    const level_box_height = 45
     const level_box = scene.add.graphics()
 
     level_box.fillStyle(blind_specific_color, 0.5)
     level_box.lineStyle(1.3, 0x000000)
 
-    level_box.fillRoundedRect(0, 0, 32, 32, 4)
-    level_box.strokeRoundedRect(0, 0, 32, 32, 4)
+    level_box.fillRoundedRect(0, 0, 32, level_box_height, 4)
+    level_box.strokeRoundedRect(0, 0, 32, level_box_height, 4)
 
-    level_box.generateTexture("pixel-rounded-box", 32, 32)
+    level_box.generateTexture("pixel-rounded-box", 32, level_box_height)
     level_box.destroy()
 
     scene.add.image(left_side_offset + 10, 156, "pixel-rounded-box")

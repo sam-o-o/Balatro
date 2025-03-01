@@ -12,16 +12,49 @@ export const sizes = {
     card_width: 106
 } as const
 
+let id: number = 1
+export function create_card(image: string,
+                            value: integer,
+                            suit: Suit,
+                            chip_flat: number,
+                            chip_factor: number,
+                            mult_flat: number,
+                            mult_factor: number):Card {
+
+    return {image: image,
+        id: get_id(),
+        value: value,
+        suit: suit,
+        chip_flat: chip_flat,
+        chip_factor: chip_factor,
+        mult_flat: mult_flat,
+        mult_factor: mult_factor}
+}
+
+function get_id(): number {
+    return id++
+}
+
+export enum Suit {
+    hearts,
+    spades,
+    diamonds,
+    clubs
+}
+
+export function get_card_image_name(suit: Suit, value: number): string {
+    return `${suit.toString()}_${value}`
+}
+
 export type Card = {
     image: string,
-    id: number,
+    id: integer,
     value: integer,
-    suit: string,
+    suit: Suit,
     chip_flat: number,
     chip_factor: number,
     mult_flat: number,
-    mult_factor: number
-
+    mult_factor: number,
 }
 
 export let deck: Array<Card> = [];

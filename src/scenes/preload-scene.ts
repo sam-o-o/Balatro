@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { scene_keys, deck } from './common'
+import { scene_keys, deck, create_card, get_card_image_name, Suit } from './common'
 
 export class PreloadScene extends Phaser.Scene {
     constructor() {
@@ -14,23 +14,22 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("play_hand_button", "/assets/play_hand_button.png") // Play hand button image
         this.load.image("discard_button", "/assets/discard_button.png") // Discard button image
 
-        for (let i = 2; i <= 14; i++){ 
+        for (let value = 2; value <= 14; value++){ 
             // All playing card images
-            this.load.image(`card_hearts_${i}`, `/assets/playing_cards/Hearts_${i}.png`)
-            this.load.image(`card_ spades_${i}`, `/assets/playing_cards/Spades_${i}.png`)
-            this.load.image(`card_diamonds_${i}`, `/assets/playing_cards/Diamonds_${i}.png`)
-            this.load.image(`card_clubs_${i}`, `/assets/playing_cards/Clubs_${i}.png`)
+            this.load.image(get_card_image_name(Suit.hearts, value), `/assets/playing_cards/Hearts_${value}.png`)
+            this.load.image(get_card_image_name(Suit.spades, value), `/assets/playing_cards/Spades_${value}.png`)
+            this.load.image(get_card_image_name(Suit.diamonds, value), `/assets/playing_cards/Diamonds_${value}.png`)
+            this.load.image(get_card_image_name(Suit.clubs, value), `/assets/playing_cards/Clubs_${value}.png`)
 
-            //Makes a deck
-            deck.push({image: `card_hearts_${i}`, id: i, value: i, suit: "hearts", chip_flat: i, chip_factor: 1, mult_flat: 0, mult_factor: 1})
-            deck.push({image: `card_ spades_${i}`, id: i + 13, value: i, suit: "spades", chip_flat: i, chip_factor: 1, mult_flat: 0, mult_factor: 1})
-            deck.push({image: `card_diamonds_${i}`, id: i + 26, value: i, suit: "diamonds", chip_flat: i, chip_factor: 1, mult_flat: 0, mult_factor: 1})
-            deck.push({image: `card_clubs_${i}`, id: i + 39, value: i, suit: "clubs", chip_flat: i, chip_factor: 1, mult_flat: 0, mult_factor: 1})
+
+            for(let suit = 0; suit < 4; suit++){
+                deck.push(create_card(get_card_image_name(suit, value), value, suit, value, 1, 0, 1))
+            }
         }
     }
 
     public create(): void {
         this.scene.start(scene_keys.gameboard)
-        // this.scene.start(scene_keys.title)
+        //this.scene.start(scene_keys.title)
     }
 }
