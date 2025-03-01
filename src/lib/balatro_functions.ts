@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack.ts'
+import { empty, push, top, pop, Stack, NonEmptyStack, is_empty } from './stack'
 import { scene_keys, sizes, deck, Card } from '../scenes/common'
     
 let card_slots: Array<{ x: number; y: number }> = []
@@ -35,6 +35,89 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
 
     return stack;
 }
+
+/**
+ * 
+ * @param arr 
+ */
+
+export function calculate_hand(arr: Array<Card> ): Array<number> {
+    const poker_hand: string = get_poker_hand(arr); 
+    let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip_flat}, 0)
+    let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult_flat}, 0)
+
+    const values: Array<number> = arr.map(card => card.value).sort((a, b) => a - b);
+    const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
+
+    if (poker_hand === "royal flush" || "straight flush") {
+        return [100 + chip_five_cards, 8 + mult_five_cards]
+    } else if (poker_hand === "four of a kind") {
+        let value = Number(Object.keys(valueCounts)[values.indexOf(4)])
+        let chip_tot: number = 0, mult_tot: number = 0
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value === value) {
+                chip_tot += arr[i].chip_flat 
+                mult_tot += arr[i].mult_flat
+            }
+        }
+        return [chip_tot + 60, mult_tot + 7]
+    } else if (poker_hand === "full house") {
+        return [40 + chip_five_cards, 4 + mult_five_cards]
+    } else if (poker_hand === "flush") {
+        return [35 + chip_five_cards, 4 + mult_five_cards]
+    } else if (poker_hand === "straight") {
+        return [30 + chip_five_cards, 4 + mult_five_cards]
+    } else if (poker_hand === "three of a kind") {
+        let value = Number(Object.keys(valueCounts)[values.indexOf(3)])
+        let chip_tot: number = 0, mult_tot: number = 0
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value === value) {
+                chip_tot += arr[i].chip_flat 
+                mult_tot += arr[i].mult_flat
+            }
+        }
+        return [chip_tot + 30, mult_tot + 3]
+    } else if (poker_hand === "two pair") {
+        return []
+    } else if (poker_hand === "pair") {
+        let value = Number(Object.keys(valueCounts)[values.indexOf(2)])
+        let chip_tot: number = 0, mult_tot: number = 0
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value === value) {
+                chip_tot += arr[i].chip_flat 
+                mult_tot += arr[i].mult_flat
+            }
+        }
+        return [chip_tot + 10, mult_tot + 2]
+    } else {
+        return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
+    }
+}
+
+export function get_poker_hand(cards: Array<Card>): string {
+    if (cards.length === 1) return "high card";
+  
+    const values: Array<number> = cards.map(card => card.value).sort((a, b) => a - b);
+    const suits: Array<string> = cards.map(card => card.suit);
+
+    const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
+    const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
+    
+    const isFlush: boolean = cards.length === 5 && new Set(suits).size === 1;
+    const isStraight: boolean = cards.length === 5 && (values.every((v, i) => i === 0 || v === values[i - 1] + 1));
+  
+    // Determine the hand type based on the above conditions
+    if (isStraight && isFlush) return values[0] === 10 ? "royal flush" : "straight flush";
+    if (counts[0] === 4) return "four of a kind";
+    if (counts[0] === 3 && counts[1] === 2) return "full house";
+    if (isFlush) return "flush";
+    if (isStraight) return "straight";
+    if (counts[0] === 3) return "three of a kind";
+    if (counts[0] === 2 && counts[1] === 2) return "two pair";
+    if (counts[0] === 2) return "pair";
+  
+    return "high card"; // If no other hand type is matched
+  }
 
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
