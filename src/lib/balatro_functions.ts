@@ -5,13 +5,17 @@ import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
 
-const numSlots: number = 7 // Number of slots
+let deck_stack: Stack<Card>
+
+const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
 const slotSpacing: number = 120  // Space between slots
 const left_side_offset: number = 25
 const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
+let discard_counter: number = 4
+
 
 
 /**
@@ -160,9 +164,9 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
-    let stack  = shuffle_cards(deck)
+    deck_stack  = shuffle_cards(deck)
 
-    for (let i = 0; i < numSlots; i++) {
+    for (let i = 0; i < num_slots; i++) {
         const x = startX + i * slotSpacing
         const y = slotY
         let card_slot: CardSlot = {
@@ -177,12 +181,51 @@ export function create_card_slots(scene: Phaser.Scene): void {
         const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
         slot.setStrokeStyle(2, 0x000000)  // Outline
         card_slots.push(card_slot)  // Adding the position
+    }
 
-        
+    draw_cards(scene)
+}
 
-        if(!is_empty(stack)) {
-            const card: Card = top(stack)
+export function create_hand_buttons(scene: Phaser.Scene): void {
+    let hand_button_image: Phaser.GameObjects.Image
+    let discard_button_image: Phaser.GameObjects.Image
+
+    const x = startX + 3 * slotSpacing
+    const y = slotY + 140
+    const space_between_buttons: number = 80
+
+    // Play hand button
+    hand_button_image = scene.add.image(x - space_between_buttons, y , "play_hand_button")
+    hand_button_image.setScale(0.5)
+    hand_button_image.setInteractive()
+    hand_button_image.on("pointerdown", function() {
+
+    })
+
+    // Discade button
+    discard_button_image = scene.add.image(x + space_between_buttons, y, "discard_button")
+    discard_button_image.setScale(0.5)
+    discard_button_image.setInteractive()
+    discard_button_image.on("pointerdown", function() {
+        if(discard_counter > 0) {
+            discard_counter--
+            discard_cards(scene)
+            draw_cards(scene)
+        }
+    })
+}
+
+function draw_cards(scene: Phaser.Scene): void {
+    for(let i = 0; i < num_slots; i++) {
+        if(card_slots[i].card == null) {
+            if(is_empty(deck_stack))
+                return
+            const card_slot: CardSlot = card_slots[i]
+            const card: Card = top(deck_stack)
+            deck_stack = pop(deck_stack)
             const card_display = scene.add.image(card_slot.x, card_slot.y, card.image)
+            card_slot.card = card
+            card_display.setDisplaySize(sizes.card_width, sizes.card_height)
             card_display.setInteractive()
             card_display.on('pointerdown', function() {
                 let numSelectedSlots : number = card_slots.filter(slot => slot.selected).length
@@ -198,27 +241,33 @@ export function create_card_slots(scene: Phaser.Scene): void {
                     card_slot.selected = false
                 }
             })
-            stack = pop(stack)
-            card_display.setDisplaySize(sizes.card_width, sizes.card_height)
         }
     }
 }
 
-export function create_hand_buttons(scene: Phaser.Scene): void {
-    for (let i = 0; i < numSlots; i++) {
-        const x = startX + i * slotSpacing
-        const y = slotY
-
-        if (i === 2){
-            const hand_button_image = scene.add.image(x + 35, y + 150, "play_hand_button")
-            hand_button_image.setScale(0.5)
-        }else if (i === 4){
-            const discard_button_image = scene.add.image(x - 35, y + 150, "discard_button")
-            discard_button_image.setScale(0.5)
+function discard_cards(scene: Phaser.Scene): void {
+    for(let i = 0; i < num_slots; i++) {
+        if(card_slots[i].selected) {
+            destroy_images_by_key(card_slots[i].card, scene)
+            card_slots[i].card = null
+            card_slots[i].selected = false
+            card_slots[i].disabled = false
         }
     }
+}
 
+function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
 
+    let key: string
+    if(card !== null) {
+        key = card.image
+    }
+
+    scene.children.list.forEach((child) => {
+        if (child instanceof Phaser.GameObjects.Image && child.texture.key === key) {
+            child.destroy()
+        }
+    })
 }
 
 export function create_left_panel(scene: Phaser.Scene) {
