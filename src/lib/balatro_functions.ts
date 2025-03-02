@@ -227,8 +227,10 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setScale(0.5)
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
-        play_cards(scene)
-        draw_cards(scene)
+        if (num_selected_slots_getter() > 0) {
+            play_cards(scene)
+            draw_cards(scene)
+        }
     })
 
     // Discard button
@@ -236,11 +238,13 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     discard_button_image.setScale(0.5)
     discard_button_image.setInteractive()
     discard_button_image.on("pointerdown", function() {
-        if(discard_counter > 0) {
-            discard_counter--
-            discard_cards(scene)
-            draw_cards(scene)
+        if (num_selected_slots_getter() > 0) {
+            if(discard_counter > 0) {
+                discard_counter--
+                discard_cards(scene)
+                draw_cards(scene)
 
+            }
         }
     })
 }
