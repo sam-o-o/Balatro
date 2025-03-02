@@ -2,17 +2,31 @@ import Phaser from 'phaser'
 import { scene_keys, deck, create_card, get_card_image_name, Suit } from './common'
 
 export class PreloadScene extends Phaser.Scene {
+
+    select_card_sfx: any
+    deselect_card_sfx: any
     constructor() {
+
         super({ key: scene_keys.preload })
+        this.select_card_sfx
+        this.deselect_card_sfx
     }
 
     public preload(): void {
+        // Preload graphics
         this.load.image("bg", "/assets/bg.jpg") // Game backgound image
         this.load.image("title_bg", "/assets/title_bg.webp") // Title background image
         this.load.image("title_text", "/assets/title_text.png") // Title text image
         this.load.image("click_to_start", "/assets/clickToStart.png") // Title click to start image
         this.load.image("play_hand_button", "/assets/play_hand_button.png") // Play hand button image
         this.load.image("discard_button", "/assets/discard_button.png") // Discard button image
+
+        //preload audio
+        this.load.audio("discard", "/audio/discard_sfx.mp3")
+        this.load.audio("select_card", "/audio/select_card_click.mp3")
+        this.load.audio("deselect_card", "/audio/deselect_card_click.mp3")
+
+
 
         for (let value = 2; value <= 14; value++){ 
             // All playing card images

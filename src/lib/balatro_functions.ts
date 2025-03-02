@@ -18,6 +18,16 @@ let discard_counter: number = 4
 
 
 
+/** 
+* Takes the name of a preloaded audio file + scene, and plays the sound file
+* @param {string} audio_name
+* @param {Phaser.Scene} scene
+*/
+export function play_sound(audio_name: string, scene: Phaser.Scene) {
+    const sound = scene.sound.add(audio_name)
+             sound.play()
+}
+
 /**
  * Takes a deck and shuffles it to a stack
  * @param {Array} arr - An array of cards that represents the full deck 
@@ -202,7 +212,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
 
     })
 
-    // Discade button
+    // Discard button
     discard_button_image = scene.add.image(x + space_between_buttons, y, "discard_button")
     discard_button_image.setScale(0.5)
     discard_button_image.setInteractive()
@@ -211,6 +221,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
             discard_counter--
             discard_cards(scene)
             draw_cards(scene)
+
         }
     })
 }
@@ -234,11 +245,13 @@ function draw_cards(scene: Phaser.Scene): void {
                     if(numSelectedSlots < 5){
                         card_display.setPosition(card_slot.x, card_slot.y - 30)
                         card_slot.selected = true
+                        play_sound("select_card", scene)
                     }
                 }
                 else {
                     card_display.setPosition(card_slot.x, card_slot.y)
                     card_slot.selected = false
+                    play_sound("deselect_card", scene)
                 }
             })
         }
@@ -248,12 +261,15 @@ function draw_cards(scene: Phaser.Scene): void {
 function discard_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].selected) {
+                    //removes the card
             destroy_images_by_key(card_slots[i].card, scene)
+                    //resets the slot
             card_slots[i].card = null
             card_slots[i].selected = false
             card_slots[i].disabled = false
         }
     }
+    play_sound("discard", scene)
 }
 
 function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
