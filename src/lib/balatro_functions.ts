@@ -3,6 +3,7 @@ import { empty, push, top, pop, Stack, is_empty } from './stack'
 import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
     
 let card_slots: Array<CardSlot> = []
+let played_card_slots: Array<CardSlot> = []
 
 const numSlots: number = 7 // Number of slots
 const panel_width: number = 330
@@ -137,7 +138,23 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     }
 }
 
+export function create_played_hand_slots(scene: Phaser.Scene): void {
+    for (let i = 0; i < 5; i++) {
+        const x = startX + i * 130 + 100
+        const y = sizes.height / 2
+        let played_slot: CardSlot = {
+            card: null,
+            selected: false,
+            disabled: false,
+            x: x,
+            y: y
+        }
 
+        const slot = scene.add.rectangle(played_slot.x, played_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        played_card_slots.push(played_slot)  // Adding the position
+    }
+}
 
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
