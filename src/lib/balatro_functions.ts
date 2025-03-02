@@ -18,6 +18,10 @@ let discard_counter: number = 4
 
 
 
+function num_selected_slots_getter (){
+    return card_slots.filter(slot => slot.selected).length
+}
+
 /** 
 * Takes the name associated with a preloaded audio file + scene, and plays the sound file
 * Sound file MUST be preloaded before calling function
@@ -259,7 +263,7 @@ function draw_cards(scene: Phaser.Scene): void {
             card_display.setDisplaySize(sizes.card_width, sizes.card_height)
             card_display.setInteractive()
             card_display.on('pointerdown', function() {
-                let numSelectedSlots : number = card_slots.filter(slot => slot.selected).length
+                let numSelectedSlots : number = num_selected_slots_getter()
 
                 if(!card_slot.selected) {
                     if(numSelectedSlots < 5){
