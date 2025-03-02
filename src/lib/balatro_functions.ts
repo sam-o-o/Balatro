@@ -193,13 +193,15 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
         const y = slotY
 
         if (i === 2){
-            const cardImage = scene.add.image(x + 35, y + 150, "play_hand_button")
-            cardImage.setScale(0.5)
+            const hand_button_image = scene.add.image(x + 35, y + 150, "play_hand_button")
+            hand_button_image.setScale(0.5)
         }else if (i === 4){
-            const cardImage = scene.add.image(x - 35, y + 150, "discard_button")
-            cardImage.setScale(0.5)
+            const discard_button_image = scene.add.image(x - 35, y + 150, "discard_button")
+            discard_button_image.setScale(0.5)
         }
     }
+
+
 }
 
 export function create_left_panel(scene: Phaser.Scene) {

@@ -21,10 +21,21 @@ export class PreloadScene extends Phaser.Scene {
             this.load.image(get_card_image_name(Suit.diamonds, value), `/assets/playing_cards/Diamonds_${value}.png`)
             this.load.image(get_card_image_name(Suit.clubs, value), `/assets/playing_cards/Clubs_${value}.png`)
 
-
-            for(let suit = 0; suit < 4; suit++){
-                deck.push(create_card(get_card_image_name(suit, value), value, suit, value, 1, 0, 1))
+            if(value <= 10) {
+                for(let suit = 0; suit < 4; suit++){
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, value, 1, 0, 1))
+                }
             }
+            else if(value < 14) {
+                for(let suit = 0; suit < 4; suit++){
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 10, 1, 0, 1))
+                }
+            }
+            else {
+                for(let suit = 0; suit < 4; suit++){
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 11, 1, 0, 1))
+                }
+            } 
         }
     }
 
