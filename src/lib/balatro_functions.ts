@@ -13,7 +13,11 @@ const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 
 
-//Shuffles your deck
+/**
+ * Takes a deck and shuffles it to a stack
+ * @param {Array} arr - An array of cards that represents the full deck 
+ * @returns {Stack} - Returns a stack in which the deck is shuffled
+ */
 export function shuffle_cards(arr: Array<Card>): Stack<Card> {
     // Create a copy of the array to preserve the original
     let shuffledArray = [...arr]; 
@@ -24,99 +28,116 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
         [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Swap elements
     }
 
-
     // Convert the shuffled array to a stack and return it
     let stack: Stack<Card> = empty<Card>();
     shuffledArray.forEach(card => {
         stack = push(card, stack);
     });
 
-
     return stack;
 }
 
 /**
- * 
- * @param arr 
+ * Calculates a hands value based on the poker hands
+ * base value and the cards value
+ * @param {Array} arr - An array of cards that represents the played hand
+ * @returns {Array} - An array of the chip total and mult total
  */
-
-export function calculate_hand(arr: Array<Card> ): Array<number> {
+export function calculate_hand(arr: Array<Card>): Array<number> {
     const poker_hand: string = get_poker_hand(arr); 
     let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip_flat}, 0)
     let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult_flat}, 0)
 
-    const values: Array<number> = arr.map(card => card.value).sort((a, b) => a - b);
-    const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
-
-    if (poker_hand === "royal flush" || "straight flush") {
-        return [100 + chip_five_cards, 8 + mult_five_cards]
-    } else if (poker_hand === "four of a kind") {
-        let value = Number(Object.keys(valueCounts)[values.indexOf(4)])
-        let chip_tot: number = 0, mult_tot: number = 0
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].value === value) {
-                chip_tot += arr[i].chip_flat 
-                mult_tot += arr[i].mult_flat
-            }
-        }
-        return [chip_tot + 60, mult_tot + 7]
-    } else if (poker_hand === "full house") {
-        return [40 + chip_five_cards, 4 + mult_five_cards]
-    } else if (poker_hand === "flush") {
-        return [35 + chip_five_cards, 4 + mult_five_cards]
-    } else if (poker_hand === "straight") {
-        return [30 + chip_five_cards, 4 + mult_five_cards]
-    } else if (poker_hand === "three of a kind") {
-        let value = Number(Object.keys(valueCounts)[values.indexOf(3)])
-        let chip_tot: number = 0, mult_tot: number = 0
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].value === value) {
-                chip_tot += arr[i].chip_flat 
-                mult_tot += arr[i].mult_flat
-            }
-        }
-        return [chip_tot + 30, mult_tot + 3]
-    } else if (poker_hand === "two pair") {
-        return []
-    } else if (poker_hand === "pair") {
-        let value = Number(Object.keys(valueCounts)[values.indexOf(2)])
-        let chip_tot: number = 0, mult_tot: number = 0
-        for (let i = 0; i < arr.length; i++) {
-            if (arr[i].value === value) {
-                chip_tot += arr[i].chip_flat 
-                mult_tot += arr[i].mult_flat
-            }
-        }
-        return [chip_tot + 10, mult_tot + 2]
-    } else {
-        return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
-    }
-}
-
-export function get_poker_hand(cards: Array<Card>): string {
-    if (cards.length === 1) return "high card";
-  
-    const values: Array<number> = cards.map(card => card.value).sort((a, b) => a - b);
-    const suits: Array<Suit> = cards.map(card => card.suit);
+    const values: Array<number> = arr.map(arr => arr.value).sort((a, b) => a - b);
+    const suits: Array<Suit> = arr.map(arr => arr.suit);
 
     const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
     const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
-    
-    const isFlush: boolean = cards.length === 5 && new Set(suits).size === 1;
-    const isStraight: boolean = cards.length === 5 && (values.every((v, i) => i === 0 || v === values[i - 1] + 1));
-  
-    // Determine the hand type based on the above conditions
-    if (isStraight && isFlush) return values[0] === 10 ? "royal flush" : "straight flush";
-    if (counts[0] === 4) return "four of a kind";
-    if (counts[0] === 3 && counts[1] === 2) return "full house";
-    if (isFlush) return "flush";
-    if (isStraight) return "straight";
-    if (counts[0] === 3) return "three of a kind";
-    if (counts[0] === 2 && counts[1] === 2) return "two pair";
-    if (counts[0] === 2) return "pair";
-  
-    return "high card"; // If no other hand type is matched
+
+    switch (poker_hand) {
+        case "royal flush": 
+        case "straight flush":
+            return [100 + chip_five_cards, 8 + mult_five_cards]
+        
+        case "four of a kind": 
+            let value = Number(Object.keys(valueCounts)[values.indexOf(4)])
+            let chip_mult: Array<number> = get_chip_mult_tot(value, arr);
+            return [60 + chip_mult[0], 7 + chip_mult[1]]
+
+        case "full house":
+            return [40 + chip_five_cards, 4 + mult_five_cards]
+
+        case "flush":
+            return [35 + chip_five_cards, 4 + mult_five_cards]
+
+        case "straight":
+            return [30 + chip_five_cards, 4 + mult_five_cards]
+            
+        case "three of a kind":
+            value = Number(Object.keys(valueCounts)[values.indexOf(3)])
+            chip_mult = get_chip_mult_tot(value, arr);
+            return [30 + chip_mult[0], 3 + chip_mult[1]]
+
+        case "two pair":
+            let pairValues = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
+            let chip_mult_1 = get_chip_mult_tot(pairValues[0], arr);
+            let chip_mult_2 = get_chip_mult_tot(pairValues[1], arr);
+
+            return [20 + chip_mult_1[0] + chip_mult_2[0], 2 + chip_mult_1[1] + chip_mult_2[1]];
+
+        case "pair":
+            value = Number(Object.keys(valueCounts)[values.indexOf(2)])
+            chip_mult = get_chip_mult_tot(value, arr);
+            return [10 + chip_mult[0], 2 + chip_mult[1]]
+
+        default:
+            return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
+    }
+
+    // Calculates the chip total and mult total for certain cards
+    function get_chip_mult_tot(value: number, arr: Array<Card>): Array<number> {
+        let chip_tot: number = 0, mult_tot: number = 0
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].value === value) {
+                chip_tot += arr[i].chip_flat 
+                mult_tot += arr[i].mult_flat
+            }
+        }
+        return [chip_tot, mult_tot]
+    }
+
+    //Returns the correct poker hand
+    function get_poker_hand(cards: Array<Card>): string {
+        if (cards.length === 1) {
+            return "high card"
+        } 
+        
+        const is_flush: boolean = cards.length === 5 && new Set(suits).size === 1;
+        const is_straight: boolean = cards.length === 5 && (values.every((v, i) => i === 0 || v === values[i - 1] + 1));
+        
+        if (is_straight && is_flush) {
+            return values[0] === 10 ? "royal flush" : "straight flush"
+        } else if (counts[0] === 4) {
+            return "four of a kind"
+        } else if (counts[0] === 3 && counts[1] === 2) {
+            return "full house"
+        } else if (is_flush) {
+            return "flush"
+        } else if (is_straight) {
+            return "straight"
+        } else if (counts[0] === 3) {
+            return "three of a kind"
+        } else if (counts[0] === 2 && counts[1] === 2) {
+            return "two pair"
+        } else if (counts[0] === 2) {
+            return "pair"
+        } 
+
+        return "high card"
+    }
 }
+
+
 
 //Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
 export function create_card_slots(scene: Phaser.Scene): void {
