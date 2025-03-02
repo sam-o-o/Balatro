@@ -141,9 +141,10 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     }
 }
 
-
-
-//Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
+/**
+ * Makes seven card slots and puts cards in them
+ * @param {Phaser.scene} scene - The scene the function is used in 
+ */
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
@@ -169,6 +170,10 @@ export function create_card_slots(scene: Phaser.Scene): void {
     draw_cards(scene)
 }
 
+/**
+ * Creates the two buttons "Play hand" and "Discard"
+ * @param {Phaser.scene} scene - The scene the function is used in  
+ */
 export function create_hand_buttons(scene: Phaser.Scene): void {
     let hand_button_image: Phaser.GameObjects.Image
     let discard_button_image: Phaser.GameObjects.Image
@@ -182,7 +187,8 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setScale(0.5)
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
-
+        play_cards(scene)
+        draw_cards(scene)
     })
 
     // Discade button
@@ -198,6 +204,11 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     })
 }
 
+/**
+ * For every empty card slots draws equal ammount
+ * of cards and puts the in your hand
+ * @param {Phaser.scene} scene - The scene the function is used in   
+ */
 function draw_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].card == null) {
@@ -228,6 +239,22 @@ function draw_cards(scene: Phaser.Scene): void {
     }
 }
 
+function play_cards(scene: Phaser.Scene): void {
+    let arr: Array<Card> = []
+    for(let i = 0; i < num_slots; i++) {
+        if(card_slots[i].selected) {
+            arr.push(card_slots[i].card as Card)
+            destroy_images_by_key(card_slots[i].card, scene)
+            card_slots[i].card = null
+            card_slots[i].selected = false
+            card_slots[i].disabled = false
+        }
+    }
+    let result: Array<number> = calculate_hand(arr)
+    console.log("Chip " + result[0])
+    console.log("Mult " + result[1])
+}
+
 function discard_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].selected) {
@@ -240,7 +267,6 @@ function discard_cards(scene: Phaser.Scene): void {
 }
 
 function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
-
     let key: string
     if(card !== null) {
         key = card.image
