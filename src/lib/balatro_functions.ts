@@ -59,7 +59,6 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
  * @returns {Array} - An array of the chip total and mult total
  */
 export function calculate_hand(arr: Array<Card>): Array<number> {
-    const poker_hand: string = get_poker_hand(arr); 
     let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip_flat}, 0)
     let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult_flat}, 0)
 
@@ -69,15 +68,18 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
     const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
 
+    const poker_hand: string = get_poker_hand(arr); 
+
     switch (poker_hand) {
         case "royal flush": 
         case "straight flush":
             return [100 + chip_five_cards, 8 + mult_five_cards]
         
-        case "four of a kind": 
-            let value = Number(Object.keys(valueCounts)[values.indexOf(4)])
+        case "four of a kind": {
+            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 4)[0]
             let chip_mult: Array<number> = get_chip_mult_tot(value, arr);
             return [60 + chip_mult[0], 7 + chip_mult[1]]
+        }
 
         case "full house":
             return [40 + chip_five_cards, 4 + mult_five_cards]
@@ -88,23 +90,26 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         case "straight":
             return [30 + chip_five_cards, 4 + mult_five_cards]
             
-        case "three of a kind":
-            value = Number(Object.keys(valueCounts)[values.indexOf(3)])
-            chip_mult = get_chip_mult_tot(value, arr);
+        case "three of a kind": {
+            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 3)[0]
+            let chip_mult = get_chip_mult_tot(value, arr);
             return [30 + chip_mult[0], 3 + chip_mult[1]]
+        }
 
-        case "two pair":
+        case "two pair": {
             let pairValues = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
             let chip_mult_1 = get_chip_mult_tot(pairValues[0], arr);
             let chip_mult_2 = get_chip_mult_tot(pairValues[1], arr);
 
             return [20 + chip_mult_1[0] + chip_mult_2[0], 2 + chip_mult_1[1] + chip_mult_2[1]];
-
-        case "pair":
-            value = Number(Object.keys(valueCounts)[values.indexOf(2)])
-            chip_mult = get_chip_mult_tot(value, arr);
+        }
+            
+        case "pair": {
+            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)[0]
+            let chip_mult = get_chip_mult_tot(value, arr);
             return [10 + chip_mult[0], 2 + chip_mult[1]]
-
+        }
+            
         default:
             return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
     }
@@ -152,6 +157,10 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     }
 }
 
+/**
+ * Makes seven card slots and puts cards in them
+ * @param {Phaser.scene} scene - The scene the function is used in 
+ */
 export function create_played_hand_slots(scene: Phaser.Scene): void {
     for (let i = 0; i < 5; i++) {
         const x = startX + i * 130 + 100
@@ -170,7 +179,7 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
     }
 }
 
-//Takes a deck (Array<cards>), shuffles the order of the cards and returns them as a stack.
+
 export function create_card_slots(scene: Phaser.Scene): void {
 
     // Clear existing card slots and cards
@@ -196,6 +205,10 @@ export function create_card_slots(scene: Phaser.Scene): void {
     draw_cards(scene)
 }
 
+/**
+ * Creates the two buttons "Play hand" and "Discard"
+ * @param {Phaser.scene} scene - The scene the function is used in  
+ */
 export function create_hand_buttons(scene: Phaser.Scene): void {
     let hand_button_image: Phaser.GameObjects.Image
     let discard_button_image: Phaser.GameObjects.Image
@@ -209,7 +222,8 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setScale(0.5)
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
-
+        play_cards(scene)
+        draw_cards(scene)
     })
 
     // Discard button
@@ -226,6 +240,11 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     })
 }
 
+/**
+ * For every empty card slots draws equal ammount
+ * of cards and puts the in your hand
+ * @param {Phaser.scene} scene - The scene the function is used in   
+ */
 function draw_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].card == null) {
@@ -258,6 +277,22 @@ function draw_cards(scene: Phaser.Scene): void {
     }
 }
 
+function play_cards(scene: Phaser.Scene): void {
+    let arr: Array<Card> = []
+    for(let i = 0; i < num_slots; i++) {
+        if(card_slots[i].selected) {
+            arr.push(card_slots[i].card as Card)
+            destroy_images_by_key(card_slots[i].card, scene)
+            card_slots[i].card = null
+            card_slots[i].selected = false
+            card_slots[i].disabled = false
+        }
+    }
+    let result: Array<number> = calculate_hand(arr)
+    console.log("Chip " + result[0])
+    console.log("Mult " + result[1])
+}
+
 function discard_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].selected) {
@@ -273,7 +308,6 @@ function discard_cards(scene: Phaser.Scene): void {
 }
 
 function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
-
     let key: string
     if(card !== null) {
         key = card.image
