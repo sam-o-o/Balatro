@@ -19,7 +19,8 @@ let discard_counter: number = 4
 
 
 /** 
-* Takes the name of a preloaded audio file + scene, and plays the sound file
+* Takes the name associated with a preloaded audio file + scene, and plays the sound file
+* Sound file MUST be preloaded before calling function
 * @param {string} audio_name
 * @param {Phaser.Scene} scene
 */
