@@ -18,7 +18,7 @@ let discard_counter: number = 4
 
 
 
-function num_selected_slots_getter (){
+function get_num_selected_slots (){
     return card_slots.filter(slot => slot.selected).length
 }
 
@@ -227,9 +227,13 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setScale(0.5)
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
-        if (num_selected_slots_getter() > 0) {
+        if (get_num_selected_slots() > 0) {
             play_cards(scene)
-            draw_cards(scene)
+            scene.time.delayedCall(3000, () => {
+                draw_cards(scene)
+                clear_played_hand(scene)
+                play_sound("discard", scene)
+            })
         }
     })
 
@@ -238,7 +242,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     discard_button_image.setScale(0.5)
     discard_button_image.setInteractive()
     discard_button_image.on("pointerdown", function() {
-        if (num_selected_slots_getter() > 0) {
+        if (get_num_selected_slots() > 0) {
             if(discard_counter > 0) {
                 discard_counter--
                 discard_cards(scene)
@@ -267,7 +271,7 @@ function draw_cards(scene: Phaser.Scene): void {
             card_display.setDisplaySize(sizes.card_width, sizes.card_height)
             card_display.setInteractive()
             card_display.on('pointerdown', function() {
-                let numSelectedSlots : number = num_selected_slots_getter()
+                let numSelectedSlots : number = get_num_selected_slots()
 
                 if(!card_slot.selected) {
                     if(numSelectedSlots < 5){
@@ -291,29 +295,51 @@ function play_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].selected) {
             arr.push(card_slots[i].card as Card)
-            destroy_images_by_key(card_slots[i].card, scene)
-            card_slots[i].card = null
-            card_slots[i].selected = false
-            card_slots[i].disabled = false
+            remove_card(scene, card_slots[i])
         }
     }
+    add_cards_to_played_hand(scene, arr)
     let result: Array<number> = calculate_hand(arr)
     console.log("Chip " + result[0])
     console.log("Mult " + result[1])
 }
 
+function add_cards_to_played_hand(scene: Phaser.Scene, cards: Array<Card>): void {
+    for(let i = 0; i < cards.length; i++) {
+
+        played_card_slots[i].card = cards[i]
+
+        const card_display = scene.add.image(
+            played_card_slots[i].x,
+            played_card_slots[i].y,
+            cards[i].image
+        )
+        card_display.setDisplaySize(sizes.card_width, sizes.card_height)
+    }
+}
+
+function clear_played_hand(scene: Phaser.Scene): void {
+    for(let i = 0; i < played_card_slots.length; i++) {
+        if(played_card_slots[i].card !== null){
+            remove_card(scene, played_card_slots[i])
+        }
+    }
+}
+
 function discard_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
         if(card_slots[i].selected) {
-                    //removes the card
-            destroy_images_by_key(card_slots[i].card, scene)
-                    //resets the slot
-            card_slots[i].card = null
-            card_slots[i].selected = false
-            card_slots[i].disabled = false
+            remove_card(scene, card_slots[i])
         }
     }
     play_sound("discard", scene)
+}
+
+function remove_card(scene: Phaser.Scene, card_slot: CardSlot): void {
+    destroy_images_by_key(card_slot.card, scene)
+    card_slot.card = null
+    card_slot.selected = false
+    card_slot.disabled = false
 }
 
 function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
