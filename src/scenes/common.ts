@@ -55,6 +55,7 @@ export type Card = {
     chip_factor: number,
     mult_flat: number,
     mult_factor: number,
+    
 }
 
 export type CardSlot = {

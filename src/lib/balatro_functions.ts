@@ -1,9 +1,11 @@
 import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, is_empty } from './stack'
 import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
+import { remove } from './list'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
+let result_of_hand: Array<number> = []
 
 let deck_stack: Stack<Card>
 
@@ -15,22 +17,28 @@ const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
-let result_of_hand: Array<number> = [], poker_hand: string, score: number = 0
+let poker_hand: string, score: number = 0
+let required_score: number = 200, round: number = 1
+let money: number = 0
+
+//Text for left panel
 let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
+let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
+let required_score_text: Phaser.GameObjects
 
 const poker_hands = {
-    royal_flush: "Royal flush",
-    straight_flush: "Straight flush",
-    four_of_a_kind: "Four of a kind",
-    full_house: "Full house",
+    royal_flush: "Royal Flush",
+    straight_flush: "Straight Flush",
+    four_of_a_kind: "Four of a Kind",
+    full_house: "Full House",
     flush: "Flush",
     straight: "Straight",
-    three_of_a_kind: "Three of a kind",
-    two_pair: "Two pair",
+    three_of_a_kind: "Three of a Kind",
+    two_pair: "Two Pair",
     pair: "Pair",
-    high_card: "High card"
+    high_card: "High Card"
 } as const
 
 function get_num_selected_slots (){
@@ -350,6 +358,42 @@ function clear_played_hand(scene: Phaser.Scene): void {
     result_of_hand = [0, 0];
     poker_hand = "";
     update_left_panel()
+    if (score >= required_score) {
+        reset_board(scene)
+    } else if (play_counter === 0) {
+        scene.add.image(700, 450, "gameover")
+    }
+}
+
+function reset_board(scene: Phaser.Scene): void {
+    discard_counter = 4
+    play_counter = 4
+    score = 0
+    round++
+    required_score += 100
+    deck_stack = shuffle_cards(deck)
+    card_slots.forEach(card_slot => {
+        remove_card(scene, card_slot)
+    })
+    money += money_earned()
+
+    scene.time.delayedCall(1000, () => {
+        update_left_panel()
+        draw_cards(scene)
+    })
+}
+
+
+function money_earned(): number {
+    switch(round % 3) {
+        case 0: 
+            return 5
+        case 1: 
+            return 4
+        case 2: 
+            return 3
+    }
+    return 0
 }
 
 function discard_cards(scene: Phaser.Scene): void {
@@ -425,11 +469,28 @@ export function create_left_panel(scene: Phaser.Scene): void {
     score_text = scene.add.text(190, 240, score.toString(), {
         fontSize: "30px"
     })
+
+    round_text = scene.add.text(265, 820, round.toString(), {
+        fontSize: "50px"
+    }).setOrigin(0.5, 0.5)
+
+    money_text = scene.add.text(265, 660, "$" + money.toString(), {
+        fontSize: "50px"    
+    }).setOrigin(0.5, 0.5)
+
+    required_score_text = scene.add.text(190, 150, required_score.toString(), {
+        fontSize: "50px"    
+    }).setOrigin(0.5, 0.5)
 }
 
 export function update_left_panel() {
     hand_counter.setText(play_counter.toString())
     discard.setText(discard_counter.toString())
+    score_text.setText(score.toString())
+    round_text.setText(round.toString())
+    money_text.setText("$" + money.toString())
+    required_score_text.setText(required_score.toString())
+
     if (result_of_hand.length === 2) {
         if(result_of_hand[0] > 99)
             chips.setFontSize("40px")
@@ -439,5 +500,4 @@ export function update_left_panel() {
         mult.setText(result_of_hand[1].toString())
         type_of_hand.setText(poker_hand)
     }
-    score_text.setText(score.toString())
 }
