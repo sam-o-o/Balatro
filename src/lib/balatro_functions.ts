@@ -14,8 +14,11 @@ const left_side_offset: number = 25
 const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
-let discard_counter: number = 4
-
+let discard_counter: number = 4, play_counter: number = 4
+let result_of_hand: Array<number> = [], poker_hand: string
+let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
+let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
+let type_of_hand: Phaser.GameObjects.Text
 
 
 function num_selected_slots_getter (){
@@ -73,12 +76,13 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
     const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
 
-    const poker_hand: string = get_poker_hand(arr); 
+    poker_hand = get_poker_hand(arr); 
 
     switch (poker_hand) {
         case "royal flush": 
-        case "straight flush":
+        case "straight flush": {
             return [100 + chip_five_cards, 8 + mult_five_cards]
+        }
         
         case "four of a kind": {
             let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 4)[0]
@@ -228,8 +232,12 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
         if (num_selected_slots_getter() > 0) {
-            play_cards(scene)
-            draw_cards(scene)
+            if (play_counter > 0) {
+                play_counter--
+                play_cards(scene)
+                draw_cards(scene)
+                update_left_panel(scene)
+            }
         }
     })
 
@@ -241,9 +249,9 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
         if (num_selected_slots_getter() > 0) {
             if(discard_counter > 0) {
                 discard_counter--
+                update_left_panel(scene)
                 discard_cards(scene)
                 draw_cards(scene)
-
             }
         }
     })
@@ -297,9 +305,8 @@ function play_cards(scene: Phaser.Scene): void {
             card_slots[i].disabled = false
         }
     }
-    let result: Array<number> = calculate_hand(arr)
-    console.log("Chip " + result[0])
-    console.log("Mult " + result[1])
+    result_of_hand = calculate_hand(arr)
+    update_left_panel(scene)
 }
 
 function discard_cards(scene: Phaser.Scene): void {
@@ -329,47 +336,54 @@ function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
     })
 }
 
-export function create_left_panel(scene: Phaser.Scene) {
-    // Draw background
+export function create_left_panel(scene: Phaser.Scene): void {
     const panel = scene.add.rectangle(left_side_offset, 0, panel_width, sizes.height, 0x25272e, 0.9).setOrigin(0, 0)
-    panel.setStrokeStyle(3, blind_specific_color)  // Outline
 
-    // Draw textbox for blind text
-    const blind_textbox = scene.add.graphics()
+    const left_panel = scene.add.image(left_side_offset, 0, "left_panel").setOrigin(0, 0)
+    left_panel.setDisplaySize(panel_width, sizes.height)
+    // Draw background
+    panel.setStrokeStyle(10, blind_specific_color)  // Outline
 
-    // Draw at a small resolution (low-res size)
-    blind_textbox.fillStyle(blind_specific_color, 1)
-    blind_textbox.lineStyle(1.3, 0x000000)
+    const button = scene.add.image(52, 593.5, "info_button").setOrigin(0, 0)
+    button.setScale(0.97)
+    button.setInteractive()
+    button.on("pointerdown", () => {
+        const info = scene.add.image(700, 450, "info_card")
+        const cross = scene.add.image(1130, 20, "cross").setOrigin(0, 0)
+        cross.setScale(0.5)
+        cross.setInteractive()
+        cross.on("pointerdown", () => {
+            info.destroy()
+            cross.destroy()
+        })
+    })
+    hand_counter = scene.add.text(100, 510, play_counter.toString(), {
+        fontSize: "50px"
+    })
 
-    // Draw the inner rectangle with rounded corners
-    blind_textbox.fillRoundedRect(0, 0, 32, 16, 4) // Inner rounded rect
-    blind_textbox.strokeRoundedRect(0, 0, 32, 16, 4) // Border
+    discard = scene.add.text(250, 510, discard_counter.toString(), {
+        fontSize: "50px"
+    })
 
-    // Convert to texture and destroy original graphics
-    blind_textbox.generateTexture("pixel-rounded-text-box", 32, 16)
-    blind_textbox.destroy()
+    chips = scene.add.text(80, 362, "", {
+        fontSize: "50px"
+    })
 
-    // Add the pixelated texture to the scene, scaled up for pixel effect
-    scene.add.image(left_side_offset + 10, 100, "pixel-rounded-text-box")
-        .setScale((panel_width - 20) / 32, 60 / 16) // Scale to match desired size
-        .setOrigin(0, 0) // Set origin to top-left corner
+    mult = scene.add.text(220, 362, "", {
+        fontSize: "50px"
+    })
 
-    // Draw level display box
+    type_of_hand = scene.add.text(90, 300, "", {
+        fontSize: "40px"
+    })
+}
 
-    const level_box_height = 45
-    const level_box = scene.add.graphics()
-
-    level_box.fillStyle(blind_specific_color, 0.5)
-    level_box.lineStyle(1.3, 0x000000)
-
-    level_box.fillRoundedRect(0, 0, 32, level_box_height, 4)
-    level_box.strokeRoundedRect(0, 0, 32, level_box_height, 4)
-
-    level_box.generateTexture("pixel-rounded-box", 32, level_box_height)
-    level_box.destroy()
-
-    scene.add.image(left_side_offset + 10, 156, "pixel-rounded-box")
-        .setScale((panel_width - 20) / 32, 60 / 16)
-        .setOrigin(0, 0)
-
+export function update_left_panel(scene: Phaser.Scene) {
+    hand_counter.setText(play_counter.toString())
+    discard.setText(discard_counter.toString())
+    if (result_of_hand.length === 2) {
+        chips.setText(result_of_hand[0].toString())
+        mult.setText(result_of_hand[1].toString())
+        type_of_hand.setText(poker_hand)
+    }
 }

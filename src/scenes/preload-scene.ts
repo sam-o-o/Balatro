@@ -20,6 +20,10 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("click_to_start", "/assets/clickToStart.png") // Title click to start image
         this.load.image("play_hand_button", "/assets/play_hand_button.png") // Play hand button image
         this.load.image("discard_button", "/assets/discard_button.png") // Discard button image
+        this.load.image("left_panel", "/assets/X.png")// An image of left panel
+        this.load.image("info_button", "/assets/info.png") //A button of info image
+        this.load.image("info_card", "/assets/howtoplay.png") //A info card explaining how game works image
+        this.load.image("cross", "/assets/cross.png") //Click out x image
 
         //preload audio
         this.load.audio("discard", "/audio/discard_sfx.mp3")
