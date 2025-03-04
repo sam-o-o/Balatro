@@ -22,7 +22,7 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("discard_button", "/assets/discard_button.png") // Discard button image
 
         //preload audio
-        this.load.audio("discard", "/audio/discard_sfx.mp3")
+        this.load.audio("draw_cards", "/audio/discard_sfx.mp3")
         this.load.audio("select_card", "/audio/select_card_click.mp3")
         this.load.audio("deselect_card", "/audio/deselect_card_click.mp3")
 
@@ -54,7 +54,7 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     public create(): void {
-        this.scene.start(scene_keys.gameboard)
-        //this.scene.start(scene_keys.title)
+        //this.scene.start(scene_keys.gameboard)
+        this.scene.start(scene_keys.title)
     }
 }

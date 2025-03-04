@@ -187,7 +187,6 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
 
 export function create_card_slots(scene: Phaser.Scene): void {
 
-    // Clear existing card slots and cards
     deck_stack  = shuffle_cards(deck)
 
     for (let i = 0; i < num_slots; i++) {
@@ -207,7 +206,9 @@ export function create_card_slots(scene: Phaser.Scene): void {
         card_slots.push(card_slot)  // Adding the position
     }
 
-    draw_cards(scene)
+    scene.time.delayedCall(300, () => {
+        draw_cards(scene)
+    })
 }
 
 /**
@@ -232,7 +233,6 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
             scene.time.delayedCall(3000, () => {
                 draw_cards(scene)
                 clear_played_hand(scene)
-                play_sound("discard", scene)
             })
         }
     })
@@ -288,6 +288,7 @@ function draw_cards(scene: Phaser.Scene): void {
             })
         }
     }
+    play_sound("draw_cards", scene)
 }
 
 function play_cards(scene: Phaser.Scene): void {
@@ -332,7 +333,6 @@ function discard_cards(scene: Phaser.Scene): void {
             remove_card(scene, card_slots[i])
         }
     }
-    play_sound("discard", scene)
 }
 
 function remove_card(scene: Phaser.Scene, card_slot: CardSlot): void {
