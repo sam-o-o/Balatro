@@ -20,6 +20,18 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text
 
+const poker_hands = {
+    royal_flush: "Royal flush",
+    straight_flush: "Straight flush",
+    four_of_a_kind: "Four of a kind",
+    full_house: "Full house",
+    flush: "Flush",
+    straight: "Straight",
+    three_of_a_kind: "Three of a kind",
+    two_pair: "Two pair",
+    pair: "Pair",
+    high_card: "High card"
+} as const
 
 function num_selected_slots_getter (){
     return card_slots.filter(slot => slot.selected).length
@@ -79,33 +91,33 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     poker_hand = get_poker_hand(arr); 
 
     switch (poker_hand) {
-        case "royal flush": 
-        case "straight flush": {
+        case poker_hands.royal_flush: 
+        case poker_hands.straight_flush: {
             return [100 + chip_five_cards, 8 + mult_five_cards]
         }
         
-        case "four of a kind": {
+        case poker_hands.four_of_a_kind: {
             let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 4)[0]
             let chip_mult: Array<number> = get_chip_mult_tot(value, arr);
             return [60 + chip_mult[0], 7 + chip_mult[1]]
         }
 
-        case "full house":
+        case poker_hands.full_house:
             return [40 + chip_five_cards, 4 + mult_five_cards]
 
-        case "flush":
+        case poker_hands.flush:
             return [35 + chip_five_cards, 4 + mult_five_cards]
 
-        case "straight":
+        case poker_hands.straight:
             return [30 + chip_five_cards, 4 + mult_five_cards]
             
-        case "three of a kind": {
+        case poker_hands.three_of_a_kind: {
             let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 3)[0]
             let chip_mult = get_chip_mult_tot(value, arr);
             return [30 + chip_mult[0], 3 + chip_mult[1]]
         }
 
-        case "two pair": {
+        case poker_hands.two_pair: {
             let pairValues = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
             let chip_mult_1 = get_chip_mult_tot(pairValues[0], arr);
             let chip_mult_2 = get_chip_mult_tot(pairValues[1], arr);
@@ -113,10 +125,10 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
             return [20 + chip_mult_1[0] + chip_mult_2[0], 2 + chip_mult_1[1] + chip_mult_2[1]];
         }
             
-        case "pair": {
+        case poker_hands.pair: {
             let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)[0]
             let chip_mult = get_chip_mult_tot(value, arr);
-            return [10 + chip_mult[0], 2 + chip_mult[1]]
+            return [100 + chip_mult[0], 2 + chip_mult[1]]
         }
             
         default:
@@ -138,31 +150,31 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     //Returns the correct poker hand
     function get_poker_hand(cards: Array<Card>): string {
         if (cards.length === 1) {
-            return "high card"
+            return poker_hands.high_card
         } 
         
         const is_flush: boolean = cards.length === 5 && new Set(suits).size === 1;
         const is_straight: boolean = cards.length === 5 && (values.every((v, i) => i === 0 || v === values[i - 1] + 1));
         
         if (is_straight && is_flush) {
-            return values[0] === 10 ? "royal flush" : "straight flush"
+            return values[0] === 10 ? poker_hands.royal_flush : poker_hands.straight_flush
         } else if (counts[0] === 4) {
-            return "four of a kind"
+            return poker_hands.four_of_a_kind
         } else if (counts[0] === 3 && counts[1] === 2) {
-            return "full house"
+            return poker_hands.full_house
         } else if (is_flush) {
-            return "flush"
+            return poker_hands.flush
         } else if (is_straight) {
-            return "straight"
+            return poker_hands.straight
         } else if (counts[0] === 3) {
-            return "three of a kind"
+            return poker_hands.three_of_a_kind
         } else if (counts[0] === 2 && counts[1] === 2) {
-            return "two pair"
+            return poker_hands.two_pair
         } else if (counts[0] === 2) {
-            return "pair"
+            return poker_hands.pair
         } 
 
-        return "high card"
+        return poker_hands.high_card
     }
 }
 
@@ -236,7 +248,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
                 play_counter--
                 play_cards(scene)
                 draw_cards(scene)
-                update_left_panel(scene)
+                update_left_panel()
             }
         }
     })
@@ -249,7 +261,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
         if (num_selected_slots_getter() > 0) {
             if(discard_counter > 0) {
                 discard_counter--
-                update_left_panel(scene)
+                update_left_panel()
                 discard_cards(scene)
                 draw_cards(scene)
             }
@@ -306,7 +318,7 @@ function play_cards(scene: Phaser.Scene): void {
         }
     }
     result_of_hand = calculate_hand(arr)
-    update_left_panel(scene)
+    update_left_panel()
 }
 
 function discard_cards(scene: Phaser.Scene): void {
@@ -365,23 +377,28 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"
     })
 
-    chips = scene.add.text(80, 362, "", {
+    chips = scene.add.text(115, 407, "0", {
+        fontSize: "50px"
+    }).setOrigin(0.5, 1)
+
+    mult = scene.add.text(220, 362, "0", {
         fontSize: "50px"
     })
 
-    mult = scene.add.text(220, 362, "", {
-        fontSize: "50px"
-    })
-
-    type_of_hand = scene.add.text(90, 300, "", {
-        fontSize: "40px"
-    })
+    type_of_hand = scene.add.text(left_side_offset + panel_width / 2, 320, "Four of a Kind", {
+        fontSize: "30px"
+        
+    }).setOrigin(0.5, 0.5)
 }
 
-export function update_left_panel(scene: Phaser.Scene) {
+export function update_left_panel() {
     hand_counter.setText(play_counter.toString())
     discard.setText(discard_counter.toString())
     if (result_of_hand.length === 2) {
+        if(result_of_hand[0] > 99)
+            chips.setFontSize("40px")
+        else
+            chips.setFontSize("50px")
         chips.setText(result_of_hand[0].toString())
         mult.setText(result_of_hand[1].toString())
         type_of_hand.setText(poker_hand)
