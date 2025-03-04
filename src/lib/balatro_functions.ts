@@ -15,10 +15,10 @@ const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
-let result_of_hand: Array<number> = [], poker_hand: string
+let result_of_hand: Array<number> = [], poker_hand: string, score: number = 0
 let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
-let type_of_hand: Phaser.GameObjects.Text
+let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal flush",
@@ -128,7 +128,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         case poker_hands.pair: {
             let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)[0]
             let chip_mult = get_chip_mult_tot(value, arr);
-            return [100 + chip_mult[0], 2 + chip_mult[1]]
+            return [10 + chip_mult[0], 2 + chip_mult[1]]
         }
             
         default:
@@ -248,7 +248,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
             if (play_counter > 0) {
                 play_counter--
                 play_cards(scene)
-                scene.time.delayedCall(3000, () => {
+                scene.time.delayedCall(2000, () => {
                     draw_cards(scene)
                     clear_played_hand(scene)
                 })
@@ -323,6 +323,7 @@ function play_cards(scene: Phaser.Scene): void {
     }
     result_of_hand = calculate_hand(arr)
     update_left_panel()
+    score += result_of_hand[0] * result_of_hand[1]
     add_cards_to_played_hand(scene, arr)
 }
 
@@ -346,6 +347,9 @@ function clear_played_hand(scene: Phaser.Scene): void {
             remove_card(scene, played_card_slots[i])
         }
     }
+    result_of_hand = [0, 0];
+    poker_hand = "";
+    update_left_panel()
 }
 
 function discard_cards(scene: Phaser.Scene): void {
@@ -413,10 +417,14 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"
     })
 
-    type_of_hand = scene.add.text(left_side_offset + panel_width / 2, 320, "Four of a Kind", {
+    type_of_hand = scene.add.text(left_side_offset + panel_width / 2, 320, "", {
         fontSize: "30px"
         
     }).setOrigin(0.5, 0.5)
+
+    score_text = scene.add.text(190, 240, score.toString(), {
+        fontSize: "30px"
+    })
 }
 
 export function update_left_panel() {
@@ -431,4 +439,5 @@ export function update_left_panel() {
         mult.setText(result_of_hand[1].toString())
         type_of_hand.setText(poker_hand)
     }
+    score_text.setText(score.toString())
 }
