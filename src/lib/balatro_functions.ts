@@ -246,7 +246,9 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
             if(discard_counter > 0) {
                 discard_counter--
                 discard_cards(scene)
-                draw_cards(scene)
+                scene.time.delayedCall(100, () => {
+                    draw_cards(scene)
+                })
 
             }
         }
