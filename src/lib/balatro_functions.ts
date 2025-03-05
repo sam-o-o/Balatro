@@ -26,7 +26,7 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
-let required_score_text: Phaser.GameObjects
+let required_score_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal Flush",
