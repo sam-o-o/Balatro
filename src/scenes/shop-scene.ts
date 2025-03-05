@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes} from './common'
+import { create_left_panel } from '../lib/balatro_functions'
 
 export class ShopScene extends Phaser.Scene {
     constructor() {
@@ -9,6 +10,9 @@ export class ShopScene extends Phaser.Scene {
     create() {
         const bg = this.add.image(0, 0, "bg").setOrigin(0, 0)
         bg.setDisplaySize(sizes.width, sizes.height)
+        
+        create_left_panel(this)
+
         bg.setInteractive()
         bg.on("pointerdown", () => {
             this.scene.start(scene_keys.gameboard)

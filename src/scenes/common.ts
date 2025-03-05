@@ -67,4 +67,15 @@ export type CardSlot = {
     y: integer
 }
 
+export const base_chip_req: Array<number> = [
+    100, // 0
+    300, // 1
+    800, // 2
+    2000, // 3
+    5000, // 4
+    11000, // 5
+    20000, // 6
+    35000, // 7
+    50000 // 8
+] as const
 export let deck: Array<Card> = [];

@@ -25,6 +25,7 @@ export class PreloadScene extends Phaser.Scene {
         this.load.image("info_card", "/assets/howtoplay.png") //A info card explaining how game works image
         this.load.image("cross", "/assets/cross.png") //Click out x image
         this.load.image("gameover", "/assets/gameover.png")
+        this.load.image("card_bg", "/assets/playing_cards/Back_1.png")
 
         //preload audio
         this.load.audio("draw_cards", "/audio/discard_sfx.mp3")
@@ -59,7 +60,8 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     public create(): void {
-        //this.scene.start(scene_keys.gameboard)
-        this.scene.start(scene_keys.title)
+        this.scene.start(scene_keys.gameboard)
+        //this.scene.start(scene_keys.title)
+        //this.scene.start(scene_keys.shop)
     }
 }

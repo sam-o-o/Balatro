@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
-import { empty, push, top, pop, Stack, is_empty } from './stack'
-import { sizes, deck, Card, Suit, CardSlot, scene_keys } from '../scenes/common'
+import { empty, push, top, pop, Stack, is_empty, stack_count } from './stack'
+import { sizes, deck, Card, Suit, CardSlot, scene_keys, base_chip_req } from '../scenes/common'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
@@ -17,7 +17,7 @@ const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
-let required_score: number = 200, round: number = 1
+let required_score: number = 300, round: number = 1, ante: number = 1
 let money: number = 0
 
 //Text for left panel
@@ -25,7 +25,9 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
+let ante_text: Phaser.GameObjects.Text
 let required_score_text: Phaser.GameObjects.Text
+let deck_total_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal Flush",
@@ -78,7 +80,19 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
 
     return stack;
 }
+export function create_deck_slot(scene: Phaser.Scene): void {
+    const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
+    deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
 
+    deck_total_text = scene.add.text(sizes.width - 100, 
+                                           card_slots[0].y + 130,
+                                           stack_count(deck_stack).toString() + "/" + deck.length.toString(), {
+        fontSize: "25px"
+    }).setOrigin(0.5, 0.5)
+}
+function update_deck_count(): void {
+    deck_total_text.setText(stack_count(deck_stack).toString() + "/" + deck.length.toString())
+}
 /**
  * Calculates a hands value based on the poker hands
  * base value and the cards value
@@ -317,6 +331,7 @@ function draw_cards(scene: Phaser.Scene): void {
             })
         }
     }
+    update_deck_count()
     play_sound("draw_cards", scene)
 }
 
@@ -370,7 +385,9 @@ function reset_board(scene: Phaser.Scene): void {
     play_counter = 4
     score = 0
     round++
-    required_score += 100
+    if(round % 3 === 1)
+        ante++
+    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5)
     deck_stack = shuffle_cards(deck)
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
@@ -474,6 +491,10 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"
     }).setOrigin(0.5, 0.5)
 
+    ante_text = scene.add.text(115, 820, ante.toString() + "/8", {
+        fontSize: "40px"
+    }).setOrigin(0.5, 0.5)
+
     money_text = scene.add.text(265, 660, "$" + money.toString(), {
         fontSize: "50px"    
     }).setOrigin(0.5, 0.5)
@@ -490,6 +511,7 @@ export function update_left_panel() {
     round_text.setText(round.toString())
     money_text.setText("$" + money.toString())
     required_score_text.setText(required_score.toString())
+    ante_text.setText(ante.toString() + "/8")
 
     if (result_of_hand.length === 2) {
         if(result_of_hand[0] > 99)
