@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, is_empty } from './stack'
-import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
+import { sizes, deck, Card, Suit, CardSlot, scene_keys } from '../scenes/common'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
@@ -359,6 +359,7 @@ function clear_played_hand(scene: Phaser.Scene): void {
     update_left_panel()
     if (score >= required_score) {
         reset_board(scene)
+        scene.scene.start(scene_keys.shop)
     } else if (play_counter === 0) {
         scene.add.image(700, 450, "gameover")
     }

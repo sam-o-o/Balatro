@@ -3,6 +3,7 @@ import Phaser from 'phaser'
 import { PreloadScene } from './scenes/preload-scene'
 import { Titlescene } from './scenes/title-scene'
 import { GameScene } from './scenes/gameboard-scene'
+import { ShopScene } from './scenes/shop-scene'
 import { sizes } from './scenes/common'
 
 const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement
@@ -13,7 +14,7 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
     height: sizes.height,
     pixelArt: true,
     canvas: gameCanvas,
-    scene: [PreloadScene, Titlescene, GameScene]
+    scene: [PreloadScene, Titlescene, GameScene, ShopScene]
 }
 
 window.onload = () => {
