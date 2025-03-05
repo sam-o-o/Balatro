@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, is_empty } from './stack'
 import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
-import { remove } from './list'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
