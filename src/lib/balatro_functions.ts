@@ -1,12 +1,15 @@
 import Phaser from 'phaser'
-import { empty, push, top, pop, Stack, is_empty } from './stack'
-import { sizes, deck, Card, Suit, CardSlot } from '../scenes/common'
+import { empty, push, top, pop, Stack, is_empty, stack_count } from './stack'
+import { sizes, deck, Card, Suit, CardSlot, scene_keys, base_chip_req } from '../scenes/common'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
+let shop_card_slots: Array<CardSlot> = []
 let result_of_hand: Array<number> = []
 
 let deck_stack: Stack<Card>
+
+let shop_attribute_slot: CardSlot
 
 const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
@@ -17,7 +20,7 @@ const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
-let required_score: number = 200, round: number = 1
+let required_score: number = 200, round: number = 1, ante: number = 1
 let money: number = 0, extra_blind: number = 1
 let is_boss_7: boolean = false
 
@@ -26,7 +29,9 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
+let ante_text: Phaser.GameObjects.Text
 let required_score_text: Phaser.GameObjects.Text
+let deck_total_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal Flush",
@@ -54,6 +59,48 @@ function get_num_selected_slots (){
 export function play_sound(audio_name: string, scene: Phaser.Scene) {
     const sound = scene.sound.add(audio_name)
              sound.play()
+}
+
+export function create_shop(scene: Phaser.Scene):void {
+    let shop_image = scene.add.image(580, sizes.height, "shop").setOrigin(0, 1)
+    shop_image.setScale(1.2)
+
+    for (let i = 0; i < 2; i++) {
+        const x = 735 + i * (slotSpacing + 70)
+        const y = 510
+        let card_slot: CardSlot = {
+            card: null,
+            selected: false,
+            disabled: false,
+            x: x,
+            y: y
+        }
+
+        const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        shop_card_slots.push(card_slot)  // Adding the position
+    }
+
+    let next_round_button = scene.add.image(927, 705, "next_round_button")
+    next_round_button.setScale(1.2)
+    next_round_button.setInteractive()
+    next_round_button.on("pointerdown", () => {
+        scene.scene.start(scene_keys.gameboard)
+    })
+
+    const x = 720
+    const y = 760
+    let card_slot: CardSlot = {
+        card: null,
+        selected: false,
+        disabled: false,
+        x: x,
+        y: y
+    }
+
+    const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+    slot.setStrokeStyle(2, 0x000000)  // Outline
+    shop_card_slots.push(card_slot)  // Adding the position
 }
 
 /**
@@ -132,6 +179,25 @@ function boss_battle(rnd: number, arr: Array<Card>): void {
         }
         return card
     }
+export function create_deck_slot(scene: Phaser.Scene): void {
+    const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
+    deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
+    deck_image.setInteractive()
+    deck_image.on("pointerdown", () => {
+        scene.scene.start(scene_keys.shop)
+        reset_board(scene)
+        update_deck_count()
+    })
+
+    deck_total_text = scene.add.text(sizes.width - 100, 
+                                           card_slots[0].y + 130,
+                                           stack_count(deck_stack).toString() + "/" + deck.length.toString(), {
+        fontSize: "25px"
+    }).setOrigin(0.5, 0.5)
+}
+
+function update_deck_count(): void {
+    deck_total_text.setText(stack_count(deck_stack).toString() + "/" + deck.length.toString())
 }
 
 /**
@@ -357,7 +423,8 @@ function draw_cards(scene: Phaser.Scene): void {
             card_slot.card = card
             card_display.setDisplaySize(sizes.card_width, sizes.card_height)
             card_display.setInteractive()
-            card_display.on('pointerdown', function() {
+
+            card_display.on('pointerdown', () => {
                 let numSelectedSlots : number = get_num_selected_slots()
 
                 if(!card_slot.selected) {
@@ -373,8 +440,17 @@ function draw_cards(scene: Phaser.Scene): void {
                     play_sound("deselect_card", scene)
                 }
             })
+
+            card_display.on("pointerover", () => {
+                card_display.setAlpha(0.8)
+            })
+
+            card_display.on('pointerout', () => {
+                card_display.setAlpha(1);
+            });
         }
     }
+    update_deck_count()
     play_sound("draw_cards", scene)
 }
 
@@ -417,6 +493,7 @@ function clear_played_hand(scene: Phaser.Scene): void {
     update_left_panel()
     if (score >= required_score) {
         reset_board(scene)
+        scene.scene.start(scene_keys.shop)
     } else if (play_counter === 0) {
         scene.add.image(700, 450, "gameover")
     }
@@ -427,9 +504,11 @@ function reset_board(scene: Phaser.Scene): void {
     play_counter = 4
     score = 0
     round++
-    required_score += 100
     is_boss_7 = false
     extra_blind = 1
+    if(round % 3 === 1)
+        ante++
+    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5)
     deck_stack = shuffle_cards(deck)
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
@@ -533,6 +612,10 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"
     }).setOrigin(0.5, 0.5)
 
+    ante_text = scene.add.text(115, 820, ante.toString() + "/8", {
+        fontSize: "40px"
+    }).setOrigin(0.5, 0.5)
+
     money_text = scene.add.text(265, 660, "$" + money.toString(), {
         fontSize: "50px"    
     }).setOrigin(0.5, 0.5)
@@ -549,6 +632,7 @@ export function update_left_panel() {
     round_text.setText(round.toString())
     money_text.setText("$" + money.toString())
     required_score_text.setText(required_score.toString())
+    ante_text.setText(ante.toString() + "/8")
 
     if (result_of_hand.length === 2) {
         if(result_of_hand[0] > 99)

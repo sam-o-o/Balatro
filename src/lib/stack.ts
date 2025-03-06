@@ -76,3 +76,12 @@ export function display_stack<T>(stck: Stack<T>): void {
         console.log("stack(" + print(stck) + ")");
     }
 }
+
+export function stack_count<T>(stck: Stack<T>): number {
+    let count = 0
+    while(!is_empty(stck)) {
+        stck = tail(stck)
+        count++
+    }
+    return count
+}
