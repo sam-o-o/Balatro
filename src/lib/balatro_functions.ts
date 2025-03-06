@@ -179,6 +179,7 @@ function boss_battle(rnd: number, arr: Array<Card>): void {
         }
         return card
     }
+}
 export function create_deck_slot(scene: Phaser.Scene): void {
     const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
     deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
@@ -508,7 +509,7 @@ function reset_board(scene: Phaser.Scene): void {
     extra_blind = 1
     if(round % 3 === 1)
         ante++
-    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5)
+    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5) * extra_blind
     deck_stack = shuffle_cards(deck)
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
