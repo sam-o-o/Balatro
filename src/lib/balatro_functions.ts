@@ -18,7 +18,8 @@ let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
 let required_score: number = 200, round: number = 1
-let money: number = 0
+let money: number = 0, extra_blind: number = 1
+let is_boss_7: boolean = false
 
 //Text for left panel
 let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
@@ -62,21 +63,75 @@ export function play_sound(audio_name: string, scene: Phaser.Scene) {
  */
 export function shuffle_cards(arr: Array<Card>): Stack<Card> {
     // Create a copy of the array to preserve the original
-    let shuffledArray = [...arr]; 
+    let shuffled_array = [...arr]; 
     
     // Fisher-Yates shuffle algorithm
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
+    for (let i = shuffled_array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1)); // Pick a random index from 0 to i
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Swap elements
+        [shuffled_array[i], shuffled_array[j]] = [shuffled_array[j], shuffled_array[i]]; // Swap elements
     }
+
+    boss_battle(round, shuffled_array)
 
     // Convert the shuffled array to a stack and return it
     let stack: Stack<Card> = empty<Card>();
-    shuffledArray.forEach(card => {
+    shuffled_array.forEach(card => {
         stack = push(card, stack);
     });
 
     return stack;
+}
+
+function boss_battle(rnd: number, arr: Array<Card>): void {
+    arr.forEach(card => {
+        switch(rnd) {
+            case 3: {
+                card = debuff_cards(Suit.diamonds, card)
+                break
+            }
+            case 6: {
+                discard_counter = 0
+                break
+            }
+            case 9: {
+                card = debuff_cards(Suit.spades, card)
+                break
+            }
+            case 12: {
+                extra_blind = 2
+                break
+            }
+            case 15: {
+                card = debuff_cards("Face cards", card)
+                break
+            } 
+            case 18: {
+                card = debuff_cards(Suit.hearts, card)
+                break
+            }
+            case 21: {
+                is_boss_7 = true
+                break
+            }
+            case 24: {
+                card = debuff_cards(Suit.clubs, card)
+                break
+            }
+        }
+    })
+    
+    function debuff_cards(attribute: Suit | String, card: Card): Card {
+        if(attribute === "Face cards") {
+            if (card.value >= 11 && card.value <= 13) {
+                card.chip_flat = 0
+                card.mult_flat = 0
+            }
+        } else if (card.suit === attribute as Suit) {
+            card.chip_flat = 0
+            card.mult_flat = 0
+        }
+        return card
+    }
 }
 
 /**
@@ -252,6 +307,9 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
         if (get_num_selected_slots() > 0) {
+            if(is_boss_7 && get_num_selected_slots() !== 5)
+                return
+
             if (play_counter > 0) {
                 play_counter--
                 play_cards(scene)
@@ -370,6 +428,8 @@ function reset_board(scene: Phaser.Scene): void {
     score = 0
     round++
     required_score += 100
+    is_boss_7 = false
+    extra_blind = 1
     deck_stack = shuffle_cards(deck)
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
