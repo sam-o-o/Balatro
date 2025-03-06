@@ -4,9 +4,12 @@ import { sizes, deck, Card, Suit, CardSlot, scene_keys, base_chip_req } from '..
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
+let shop_card_slots: Array<CardSlot> = []
 let result_of_hand: Array<number> = []
 
 let deck_stack: Stack<Card>
+
+let shop_attribute_slot: CardSlot
 
 const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
@@ -57,6 +60,48 @@ export function play_sound(audio_name: string, scene: Phaser.Scene) {
              sound.play()
 }
 
+export function create_shop(scene: Phaser.Scene):void {
+    let shop_image = scene.add.image(580, sizes.height, "shop").setOrigin(0, 1)
+    shop_image.setScale(1.2)
+
+    for (let i = 0; i < 2; i++) {
+        const x = 735 + i * (slotSpacing + 70)
+        const y = 510
+        let card_slot: CardSlot = {
+            card: null,
+            selected: false,
+            disabled: false,
+            x: x,
+            y: y
+        }
+
+        const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        shop_card_slots.push(card_slot)  // Adding the position
+    }
+
+    let next_round_button = scene.add.image(927, 705, "next_round_button")
+    next_round_button.setScale(1.2)
+    next_round_button.setInteractive()
+    next_round_button.on("pointerdown", () => {
+        scene.scene.start(scene_keys.gameboard)
+    })
+
+    const x = 720
+    const y = 760
+    let card_slot: CardSlot = {
+        card: null,
+        selected: false,
+        disabled: false,
+        x: x,
+        y: y
+    }
+
+    const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+    slot.setStrokeStyle(2, 0x000000)  // Outline
+    shop_card_slots.push(card_slot)  // Adding the position
+}
+
 /**
  * Takes a deck and shuffles it to a stack
  * @param {Array} arr - An array of cards that represents the full deck 
@@ -80,9 +125,16 @@ export function shuffle_cards(arr: Array<Card>): Stack<Card> {
 
     return stack;
 }
+
 export function create_deck_slot(scene: Phaser.Scene): void {
     const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
     deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
+    deck_image.setInteractive()
+    deck_image.on("pointerdown", () => {
+        scene.scene.start(scene_keys.shop)
+        reset_board(scene)
+        update_deck_count()
+    })
 
     deck_total_text = scene.add.text(sizes.width - 100, 
                                            card_slots[0].y + 130,
@@ -90,9 +142,11 @@ export function create_deck_slot(scene: Phaser.Scene): void {
         fontSize: "25px"
     }).setOrigin(0.5, 0.5)
 }
+
 function update_deck_count(): void {
     deck_total_text.setText(stack_count(deck_stack).toString() + "/" + deck.length.toString())
 }
+
 /**
  * Calculates a hands value based on the poker hands
  * base value and the cards value
@@ -313,7 +367,8 @@ function draw_cards(scene: Phaser.Scene): void {
             card_slot.card = card
             card_display.setDisplaySize(sizes.card_width, sizes.card_height)
             card_display.setInteractive()
-            card_display.on('pointerdown', function() {
+
+            card_display.on('pointerdown', () => {
                 let numSelectedSlots : number = get_num_selected_slots()
 
                 if(!card_slot.selected) {
@@ -329,6 +384,14 @@ function draw_cards(scene: Phaser.Scene): void {
                     play_sound("deselect_card", scene)
                 }
             })
+
+            card_display.on("pointerover", () => {
+                card_display.setAlpha(0.8)
+            })
+
+            card_display.on('pointerout', () => {
+                card_display.setAlpha(1);
+            });
         }
     }
     update_deck_count()
