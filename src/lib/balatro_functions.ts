@@ -22,16 +22,17 @@ let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
 let required_score: number = 200, round: number = 1, ante: number = 1
 let money: number = 0, extra_blind: number = 1
-let is_boss_7: boolean = false
+let is_boss_7: boolean = false, type_boss: string, blind: string = "Small Blind"
 
 //Text for left panel
 let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
-let ante_text: Phaser.GameObjects.Text
+let ante_text: Phaser.GameObjects.Text, boss_text: Phaser.GameObjects.Text
 let required_score_text: Phaser.GameObjects.Text
 let deck_total_text: Phaser.GameObjects.Text
+let blind_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal Flush",
@@ -134,34 +135,42 @@ function boss_battle(rnd: number, arr: Array<Card>): void {
         switch(rnd) {
             case 3: {
                 card = debuff_cards(Suit.diamonds, card)
+                type_boss = "All Diamonds are \ndebuffed"
                 break
             }
             case 6: {
                 discard_counter = 0
+                type_boss = "Start with 0 \ndiscards"
                 break
             }
             case 9: {
                 card = debuff_cards(Suit.spades, card)
+                type_boss = "All Spades are \ndebuffed"
                 break
             }
             case 12: {
                 extra_blind = 2
+                type_boss = "Extra large blind"
                 break
             }
             case 15: {
                 card = debuff_cards("Face cards", card)
+                type_boss = "All Face cards are \ndebuffed"
                 break
             } 
             case 18: {
                 card = debuff_cards(Suit.hearts, card)
+                type_boss = "All Hearts are \ndebuffed"
                 break
             }
             case 21: {
                 is_boss_7 = true
+                type_boss = "Must play 5 cards"
                 break
             }
             case 24: {
                 card = debuff_cards(Suit.clubs, card)
+                type_boss = "All Clubs are \ndebuffed"
                 break
             }
         }
@@ -507,6 +516,14 @@ function reset_board(scene: Phaser.Scene): void {
     round++
     is_boss_7 = false
     extra_blind = 1
+    if (round % 3 === 0) {
+        blind = "Boss blind"
+    } else if (round % 2 === 0) {
+        blind = "Big blind"
+    } else {
+        blind = "Small blind"
+    }
+
     if(round % 3 === 1)
         ante++
     required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5) * extra_blind
@@ -621,9 +638,21 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"    
     }).setOrigin(0.5, 0.5)
 
-    required_score_text = scene.add.text(190, 150, required_score.toString(), {
-        fontSize: "50px"    
-    }).setOrigin(0.5, 0.5)
+    required_score_text = scene.add.text(180, 155, required_score.toString(), {
+        fontSize: "40px"    
+    })
+
+    boss_text = scene.add.text(190, 110, type_boss, {
+        fontSize: "23px"
+    }).setOrigin(0.5, 0.5) 
+    
+    blind_text = scene.add.text(180, 50, blind, {
+        fontSize: "30px"
+    }).setOrigin(0.5, 0.5) 
+
+    scene.add.text(60, 155, "Required \n score:", {
+        fontSize: "20px"
+    })
 }
 
 export function update_left_panel() {
@@ -634,6 +663,8 @@ export function update_left_panel() {
     money_text.setText("$" + money.toString())
     required_score_text.setText(required_score.toString())
     ante_text.setText(ante.toString() + "/8")
+
+    blind_text.setText(blind)
 
     if (result_of_hand.length === 2) {
         if(result_of_hand[0] > 99)
