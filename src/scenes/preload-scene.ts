@@ -45,17 +45,17 @@ export class PreloadScene extends Phaser.Scene {
 
             if(value <= 10) {
                 for(let suit = 0; suit < 4; suit++){
-                    deck.push(create_card(get_card_image_name(suit, value), value, suit, value, 1, 0, 1))
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, value, 0))
                 }
             }
             else if(value < 14) {
                 for(let suit = 0; suit < 4; suit++){
-                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 10, 1, 0, 1))
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 10, 0))
                 }
             }
             else {
                 for(let suit = 0; suit < 4; suit++){
-                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 11, 1, 0, 1))
+                    deck.push(create_card(get_card_image_name(suit, value), value, suit, 11, 0))
                 }
             } 
         }
