@@ -17,19 +17,15 @@ let id: number = 1
 export function create_card(image: string,
                             value: integer,
                             suit: Suit,
-                            chip_flat: number,
-                            chip_factor: number,
-                            mult_flat: number,
-                            mult_factor: number):Card {
+                            chip: number,
+                            mult: number):Card {
 
     return {image: image,
         id: get_id(),
         value: value,
         suit: suit,
-        chip_flat: chip_flat,
-        chip_factor: chip_factor,
-        mult_flat: mult_flat,
-        mult_factor: mult_factor}
+        chip: chip,
+        mult: mult,}
 }
 
 function get_id(): number {
@@ -52,11 +48,8 @@ export type Card = {
     id: integer,
     value: integer,
     suit: Suit,
-    chip_flat: number,
-    chip_factor: number,
-    mult_flat: number,
-    mult_factor: number,
-    
+    chip: number,
+    mult: number,
 }
 
 export type Joker = {

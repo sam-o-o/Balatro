@@ -22,8 +22,9 @@ const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
-let required_score: number = 300, round: number = 1, ante: number = 1
-let money: number = 0
+let required_score: number = 200, round: number = 1, ante: number = 1
+let money: number = 0, extra_blind: number = 1
+let is_boss_7: boolean = false, type_boss: string, blind: string = "Small Blind"
 let own_joker_1: boolean = false
 
 //Text for left panel
@@ -31,9 +32,10 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
-let ante_text: Phaser.GameObjects.Text
+let ante_text: Phaser.GameObjects.Text, boss_text: Phaser.GameObjects.Text
 let required_score_text: Phaser.GameObjects.Text
 let deck_total_text: Phaser.GameObjects.Text
+let blind_text: Phaser.GameObjects.Text
 
 const poker_hands = {
     royal_flush: "Royal Flush",
@@ -227,23 +229,84 @@ function buy_joker(scene: Phaser.Scene, joker: Joker):void {
  */
 export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
     // Create a copy of the array to preserve the original
-    let shuffledArray = [...arr]
+    let shuffled_array = [...arr]; 
     
     // Fisher-Yates shuffle algorithm
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
+    for (let i = shuffled_array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1)); // Pick a random index from 0 to i
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]] // Swap elements
+        [shuffled_array[i], shuffled_array[j]] = [shuffled_array[j], shuffled_array[i]]; // Swap elements
     }
+
+    boss_battle(round, shuffled_array)
 
     // Convert the shuffled array to a stack and return it
     let stack: Stack<Card | Joker> = empty<Card>()
-    shuffledArray.forEach(card => {
+    shuffled_array.forEach(card => {
         stack = push(card, stack)
     })
 
     return stack
 }
 
+function boss_battle(rnd: number, arr: Array<Card>): void {
+    arr.forEach(card => {
+        switch(rnd) {
+            case 3: {
+                card = debuff_cards(Suit.diamonds, card)
+                type_boss = "All Diamonds are \ndebuffed"
+                break
+            }
+            case 6: {
+                discard_counter = 0
+                type_boss = "Start with 0 \ndiscards"
+                break
+            }
+            case 9: {
+                card = debuff_cards(Suit.spades, card)
+                type_boss = "All Spades are \ndebuffed"
+                break
+            }
+            case 12: {
+                extra_blind = 2
+                type_boss = "Extra large blind"
+                break
+            }
+            case 15: {
+                card = debuff_cards("Face cards", card)
+                type_boss = "All Face cards are \ndebuffed"
+                break
+            } 
+            case 18: {
+                card = debuff_cards(Suit.hearts, card)
+                type_boss = "All Hearts are \ndebuffed"
+                break
+            }
+            case 21: {
+                is_boss_7 = true
+                type_boss = "Must play 5 cards"
+                break
+            }
+            case 24: {
+                card = debuff_cards(Suit.clubs, card)
+                type_boss = "All Clubs are \ndebuffed"
+                break
+            }
+        }
+    })
+    
+    function debuff_cards(attribute: Suit | String, card: Card): Card {
+        if(attribute === "Face cards") {
+            if (card.value >= 11 && card.value <= 13) {
+                card.chip = 0
+                card.mult = 0
+            }
+        } else if (card.suit === attribute as Suit) {
+            card.chip = 0
+            card.mult = 0
+        }
+        return card
+    }
+}
 export function create_deck_slot(scene: Phaser.Scene): void {
     const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
     deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
@@ -266,8 +329,8 @@ function update_deck_count(): void {
  * @returns {Array} - An array of the chip total and mult total
  */
 export function calculate_hand(arr: Array<Card>): Array<number> {
-    let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip_flat}, 0)
-    let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult_flat}, 0)
+    let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip}, 0)
+    let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult}, 0)
 
     const values: Array<number> = arr.map(arr => arr.value).sort((a, b) => a - b);
     const suits: Array<Suit> = arr.map(arr => arr.suit);
@@ -319,7 +382,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         }
             
         default:
-            return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
+            return [arr[0].chip + 5, arr[0].mult + 1]
     }
 
     // Calculates the chip total and mult total for certain cards
@@ -327,8 +390,8 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         let chip_tot: number = 0, mult_tot: number = 0
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].value === value) {
-                chip_tot += arr[i].chip_flat 
-                mult_tot += arr[i].mult_flat
+                chip_tot += arr[i].chip 
+                mult_tot += arr[i].mult
             }
         }
         return [chip_tot, mult_tot]
@@ -432,6 +495,9 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     hand_button_image.setInteractive()
     hand_button_image.on("pointerdown", function() {
         if (get_num_selected_slots() > 0) {
+            if(is_boss_7 && get_num_selected_slots() !== 5)
+                return
+
             if (play_counter > 0) {
                 play_counter--
                 play_cards(scene)
@@ -564,9 +630,19 @@ function reset_board(scene: Phaser.Scene): void {
     play_counter = 4
     score = 0
     round++
+    is_boss_7 = false
+    extra_blind = 1
+    if (round % 3 === 0) {
+        blind = "Boss blind"
+    } else if (round % 2 === 0) {
+        blind = "Big blind"
+    } else {
+        blind = "Small blind"
+    }
+
     if(round % 3 === 1)
         ante++
-    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5)
+    required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5) * extra_blind
     deck_stack = shuffle_cards(deck) as Stack<Card>
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
@@ -580,14 +656,14 @@ function reset_board(scene: Phaser.Scene): void {
 }
 
 
-function money_earned(): number {
+export function money_earned(): number {
     switch(round % 3) {
-        case 0: 
-            return 5
-        case 1: 
-            return 4
-        case 2: 
+        case 1: //first round
             return 3
+        case 2: //second round
+            return 4
+        case 0: //boss round
+            return 5
     }
     return 0
 }
@@ -694,9 +770,21 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "50px"    
     }).setOrigin(0.5, 0.5)
 
-    required_score_text = scene.add.text(190, 150, required_score.toString(), {
-        fontSize: "50px"    
-    }).setOrigin(0.5, 0.5)
+    required_score_text = scene.add.text(180, 155, required_score.toString(), {
+        fontSize: "40px"    
+    })
+
+    boss_text = scene.add.text(190, 110, type_boss, {
+        fontSize: "23px"
+    }).setOrigin(0.5, 0.5) 
+    
+    blind_text = scene.add.text(180, 50, blind, {
+        fontSize: "30px"
+    }).setOrigin(0.5, 0.5) 
+
+    scene.add.text(60, 155, "Required \n score:", {
+        fontSize: "20px"
+    })
 }
 
 export function update_left_panel() {
@@ -707,6 +795,8 @@ export function update_left_panel() {
     money_text.setText("$" + money.toString())
     required_score_text.setText(required_score.toString())
     ante_text.setText(ante.toString() + "/8")
+
+    blind_text.setText(blind)
 
     if (result_of_hand.length === 2) {
         if(result_of_hand[0] > 99)
