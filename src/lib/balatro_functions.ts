@@ -194,28 +194,28 @@ function buy_joker(scene: Phaser.Scene, joker: Joker):void {
         case 2: {
             deck.forEach(card => {
                 if(card.suit === Suit.diamonds) 
-                    card.mult_flat += 4
+                    card.mult += 4
             })
             break
         }
         case 3: {
             deck.forEach(card => {
                 if(card.suit === Suit.hearts) 
-                    card.mult_flat += 4
+                    card.mult += 4
             })
             break
         }
         case 4: {
             deck.forEach(card => {
                 if(card.suit === Suit.spades) 
-                    card.mult_flat += 4
+                    card.mult += 4
             })
             break
         }
         case 5: {
             deck.forEach(card => {
                 if(card.suit === Suit.clubs) 
-                    card.mult_flat += 4
+                    card.mult += 4
             })
             break
         }
@@ -248,8 +248,10 @@ export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
     return stack
 }
 
-function boss_battle(rnd: number, arr: Array<Card>): void {
+function boss_battle(rnd: number, arr: Array<Card | Joker>): void {
     arr.forEach(card => {
+        if(isJoker(card))
+            return
         switch(rnd) {
             case 3: {
                 card = debuff_cards(Suit.diamonds, card)
@@ -294,7 +296,8 @@ function boss_battle(rnd: number, arr: Array<Card>): void {
         }
     })
     
-    function debuff_cards(attribute: Suit | String, card: Card): Card {
+    function debuff_cards(attribute: Suit | String, card: Card): Card{
+
         if(attribute === "Face cards") {
             if (card.value >= 11 && card.value <= 13) {
                 card.chip = 0
