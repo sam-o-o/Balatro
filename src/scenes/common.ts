@@ -59,6 +59,13 @@ export type Card = {
     
 }
 
+export type Joker = {
+    id: number
+    image: string
+    price: number
+    description: string
+}
+
 export type CardSlot = {
     card: Card | null,
     selected: boolean,
@@ -78,4 +85,6 @@ export const base_chip_req: Array<number> = [
     35000, // 7
     50000 // 8
 ] as const
-export let deck: Array<Card> = [];
+
+export let deck: Array<Card> = []
+export let joker_deck: Array<Joker> = []

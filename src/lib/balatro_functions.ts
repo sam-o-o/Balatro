@@ -1,13 +1,15 @@
 import Phaser from 'phaser'
 import { empty, push, top, pop, Stack, is_empty, stack_count } from './stack'
-import { sizes, deck, Card, Suit, CardSlot, scene_keys, base_chip_req } from '../scenes/common'
+import { sizes, deck, Card, Suit, CardSlot, scene_keys, base_chip_req, Joker, joker_deck } from '../scenes/common'
     
 let card_slots: Array<CardSlot> = []
 let played_card_slots: Array<CardSlot> = []
 let shop_card_slots: Array<CardSlot> = []
 let result_of_hand: Array<number> = []
+let current_jokers: Array<Joker> = []
 
 let deck_stack: Stack<Card>
+let joker_deck_stack: Stack<Joker>
 
 let shop_attribute_slot: CardSlot
 
@@ -22,6 +24,7 @@ let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
 let required_score: number = 300, round: number = 1, ante: number = 1
 let money: number = 0
+let own_joker_1: boolean = false
 
 //Text for left panel
 let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
@@ -45,7 +48,7 @@ const poker_hands = {
     high_card: "High Card"
 } as const
 
-function get_num_selected_slots (){
+function get_num_selected_slots(): number {
     return card_slots.filter(slot => slot.selected).length
 }
 
@@ -60,9 +63,47 @@ export function play_sound(audio_name: string, scene: Phaser.Scene) {
              sound.play()
 }
 
+export function create_joker_slots(scene: Phaser.Scene): void {
+    for (let i = 0; i < 5; i++) {
+        const x = startX + 30 + i * slotSpacing
+        const y = 150
+        let card_slot: CardSlot = {
+            card: null,
+            selected: false,
+            disabled: false,
+            x: x,
+            y: y
+        }
+
+        const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
+        slot.setStrokeStyle(2, 0x000000)  // Outline
+        shop_card_slots.push(card_slot)  // Adding the position
+
+        let joker = scene.add.image(card_slot.x, card_slot.y, current_jokers[i]?.image)
+        joker.setDisplaySize(sizes.card_width, sizes.card_height)
+        joker.setInteractive()
+
+        joker.on("pointerover", () => {
+            joker.setAlpha(0.9)
+            let desc = scene.add.image(1180, 150, current_jokers[i].description)
+            desc.setScale(0.8)
+        })
+
+        joker.on("pointerout", () => {
+            joker.setAlpha(1)
+            destroy_images_by_key(current_jokers[i], true, scene)
+        })
+    }
+}
+
 export function create_shop(scene: Phaser.Scene):void {
     let shop_image = scene.add.image(580, sizes.height, "shop").setOrigin(0, 1)
     shop_image.setScale(1.2)
+
+    joker_deck_stack = shuffle_cards(joker_deck) as Stack<Joker>
+
+    let desc_x: number = 825
+    let desc_y: number = 100
 
     for (let i = 0; i < 2; i++) {
         const x = 735 + i * (slotSpacing + 70)
@@ -78,6 +119,39 @@ export function create_shop(scene: Phaser.Scene):void {
         const slot = scene.add.rectangle(card_slot.x, card_slot.y, sizes.card_width, sizes.card_height, 0xffffff, 0.3)
         slot.setStrokeStyle(2, 0x000000)  // Outline
         shop_card_slots.push(card_slot)  // Adding the position
+
+        if(is_empty(joker_deck_stack))
+            return
+        let joker = top(joker_deck_stack)
+
+        let joker_image = scene.add.image(card_slot.x, card_slot.y, joker.image)
+        joker_image.setDisplaySize(sizes.card_width, sizes.card_height)
+        joker_image.setInteractive()
+
+        let price_text = scene.add.text(card_slot.x - 50, card_slot.y + 45, "$" + joker.price.toString(), {
+            fontSize: "30px",
+            color: "#000000",
+            fontStyle: "bold"
+        })
+
+        joker_image.on("pointerover", () => {
+            joker_image.setAlpha(0.8)
+            scene.add.image(desc_x, desc_y, joker.description)
+        })
+
+        joker_image.on("pointerout", () => {
+            joker_image.setAlpha(1)
+            destroy_images_by_key(joker, true, scene)
+        })
+
+        joker_image.on("pointerdown", () => {
+            if(money >= joker.price) {
+                buy_joker(scene, joker)
+                price_text.destroy()
+            }
+        })
+
+        joker_deck_stack = pop(joker_deck_stack)
     }
 
     let next_round_button = scene.add.image(927, 705, "next_round_button")
@@ -102,39 +176,77 @@ export function create_shop(scene: Phaser.Scene):void {
     shop_card_slots.push(card_slot)  // Adding the position
 }
 
+function buy_joker(scene: Phaser.Scene, joker: Joker):void {
+    current_jokers.push(joker)
+    destroy_images_by_key(joker, false, scene)
+    destroy_images_by_key(joker, true, scene)
+    money -= joker.price
+
+    update_left_panel()
+
+    switch(joker.id){
+        case 1: {
+            own_joker_1 = true
+            break
+        }
+        case 2: {
+            deck.forEach(card => {
+                if(card.suit === Suit.diamonds) 
+                    card.mult_flat += 4
+            })
+            break
+        }
+        case 3: {
+            deck.forEach(card => {
+                if(card.suit === Suit.hearts) 
+                    card.mult_flat += 4
+            })
+            break
+        }
+        case 4: {
+            deck.forEach(card => {
+                if(card.suit === Suit.spades) 
+                    card.mult_flat += 4
+            })
+            break
+        }
+        case 5: {
+            deck.forEach(card => {
+                if(card.suit === Suit.clubs) 
+                    card.mult_flat += 4
+            })
+            break
+        }
+    }
+}
+
 /**
  * Takes a deck and shuffles it to a stack
  * @param {Array} arr - An array of cards that represents the full deck 
  * @returns {Stack} - Returns a stack in which the deck is shuffled
  */
-export function shuffle_cards(arr: Array<Card>): Stack<Card> {
+export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
     // Create a copy of the array to preserve the original
-    let shuffledArray = [...arr]; 
+    let shuffledArray = [...arr]
     
     // Fisher-Yates shuffle algorithm
     for (let i = shuffledArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1)); // Pick a random index from 0 to i
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Swap elements
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]] // Swap elements
     }
 
     // Convert the shuffled array to a stack and return it
-    let stack: Stack<Card> = empty<Card>();
+    let stack: Stack<Card | Joker> = empty<Card>()
     shuffledArray.forEach(card => {
-        stack = push(card, stack);
-    });
+        stack = push(card, stack)
+    })
 
-    return stack;
+    return stack
 }
 
 export function create_deck_slot(scene: Phaser.Scene): void {
     const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
     deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
-    deck_image.setInteractive()
-    deck_image.on("pointerdown", () => {
-        scene.scene.start(scene_keys.shop)
-        reset_board(scene)
-        update_deck_count()
-    })
 
     deck_total_text = scene.add.text(sizes.width - 100, 
                                            card_slots[0].y + 130,
@@ -278,7 +390,7 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
 
 export function create_card_slots(scene: Phaser.Scene): void {
 
-    deck_stack  = shuffle_cards(deck)
+    deck_stack  = shuffle_cards(deck) as Stack<Card>
 
     for (let i = 0; i < num_slots; i++) {
         const x = startX + i * slotSpacing
@@ -407,6 +519,10 @@ function play_cards(scene: Phaser.Scene): void {
         }
     }
     result_of_hand = calculate_hand(arr)
+    if(own_joker_1) {
+        result_of_hand = [result_of_hand[0], result_of_hand[1] + 4]
+    }
+
     update_left_panel()
     score += result_of_hand[0] * result_of_hand[1]
     add_cards_to_played_hand(scene, arr)
@@ -451,7 +567,7 @@ function reset_board(scene: Phaser.Scene): void {
     if(round % 3 === 1)
         ante++
     required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5)
-    deck_stack = shuffle_cards(deck)
+    deck_stack = shuffle_cards(deck) as Stack<Card>
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
     })
@@ -485,16 +601,22 @@ function discard_cards(scene: Phaser.Scene): void {
 }
 
 function remove_card(scene: Phaser.Scene, card_slot: CardSlot): void {
-    destroy_images_by_key(card_slot.card, scene)
+    destroy_images_by_key(card_slot.card, false, scene)
     card_slot.card = null
     card_slot.selected = false
     card_slot.disabled = false
 }
 
-function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
+function destroy_images_by_key(card: Card | Joker | null, is_desc: boolean, scene: Phaser.Scene) {
     let key: string
-    if(card !== null) {
+    if(card !== null) 
         key = card.image
+
+    if(isJoker(card)){
+        if(is_desc) 
+            key = card.description
+        else
+            key = card.image
     }
 
     scene.children.list.forEach((child) => {
@@ -502,6 +624,16 @@ function destroy_images_by_key(card: Card | null, scene: Phaser.Scene) {
             child.destroy()
         }
     })
+}
+
+function isJoker(obj: any): obj is Joker {
+    return (
+        obj &&
+        typeof obj.id === "number" &&
+        typeof obj.image === "string" &&
+        typeof obj.price === "number" &&
+        typeof obj.description === "string"
+    );
 }
 
 export function create_left_panel(scene: Phaser.Scene): void {

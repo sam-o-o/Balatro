@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { scene_keys, sizes } from './common'
-import { create_card_slots, create_deck_slot, create_hand_buttons, create_left_panel, create_played_hand_slots} from '../lib/balatro_functions'
+import { create_card_slots, create_deck_slot, create_hand_buttons, create_joker_slots, create_left_panel, create_played_hand_slots} from '../lib/balatro_functions'
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -20,5 +20,6 @@ export class GameScene extends Phaser.Scene {
         create_played_hand_slots(this)
         create_hand_buttons(this)
         create_left_panel(this)
+        create_joker_slots(this)
     }
 }

@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { scene_keys, deck, create_card, get_card_image_name, Suit } from './common'
+import { scene_keys, deck, create_card, get_card_image_name, Suit, joker_deck } from './common'
 
 export class PreloadScene extends Phaser.Scene {
 
@@ -34,7 +34,15 @@ export class PreloadScene extends Phaser.Scene {
         this.load.audio("select_card", "/audio/select_card_click.mp3")
         this.load.audio("deselect_card", "/audio/deselect_card_click.mp3")
 
+        for (let i = 1; i <= 5; i++) {
+            this.load.image(`joker_${i}`, `/assets/playing_cards/Joker_${i}.png`)
+            this.load.image(`description_${i}`, `/assets/${i}.png`)
 
+            if(i === 1)
+                joker_deck.push( {id: i, image: `joker_${i}`, price: 3, description: `description_${i}`} )
+            else
+                joker_deck.push( {id: i, image: `joker_${i}`, price: 5, description: `description_${i}`} )
+        }
 
         for (let value = 2; value <= 14; value++){ 
             // All playing card images
