@@ -454,39 +454,84 @@ function draw_cards(scene: Phaser.Scene): void {
             const card_slot: CardSlot = card_slots[i]
             const card: Card = top(deck_stack)
             deck_stack = pop(deck_stack)
-            const card_display = scene.add.image(card_slot.x, card_slot.y, card.image)
+            
             card_slot.card = card
-            card_display.setDisplaySize(sizes.card_width, sizes.card_height)
-            card_display.setInteractive()
-
-            card_display.on('pointerdown', () => {
-                let numSelectedSlots : number = get_num_selected_slots()
-
-                if(!card_slot.selected) {
-                    if(numSelectedSlots < 5){
-                        card_display.setPosition(card_slot.x, card_slot.y - 30)
-                        card_slot.selected = true
-                        play_sound("select_card", scene)
-                    }
-                }
-                else {
-                    card_display.setPosition(card_slot.x, card_slot.y)
-                    card_slot.selected = false
-                    play_sound("deselect_card", scene)
-                }
-            })
-
-            card_display.on("pointerover", () => {
-                card_display.setAlpha(0.8)
-            })
-
-            card_display.on('pointerout', () => {
-                card_display.setAlpha(1);
-            });
         }
+    }       
+    card_slots = sort_card_slot_card(card_slots)
+    clear_hand(scene)
+    for (let i = 0; i < num_slots; i++) {
+        const card_slot: CardSlot = card_slots[i]
+
+        const card_display = scene.add.image(card_slot.x, card_slot.y, card_slot.card!.image)
+        card_display.setDisplaySize(sizes.card_width, sizes.card_height)
+        card_display.setInteractive()
+
+        card_display.on('pointerdown', () => {
+            let numSelectedSlots : number = get_num_selected_slots()
+
+            if(!card_slot.selected) {
+                if(numSelectedSlots < 5){
+                    card_display.setPosition(card_slot.x, card_slot.y - 30)
+                    card_slot.selected = true
+                    play_sound("select_card", scene)
+                }
+            }
+            else {
+                card_display.setPosition(card_slot.x, card_slot.y)
+                card_slot.selected = false
+                play_sound("deselect_card", scene)
+            }
+        })
+
+        card_display.on("pointerover", () => {
+            card_display.setAlpha(0.8)
+        })
+
+        card_display.on('pointerout', () => {
+            card_display.setAlpha(1);
+        });
     }
+            
     update_deck_count()
     play_sound("draw_cards", scene)
+}
+
+function clear_hand(scene: Phaser.Scene): void {
+    for(let i = 0; i < num_slots; i++) {
+        destroy_images_by_key(card_slots[i].card, scene)
+    }
+}
+
+/**
+ * Using selection sort sorts a hand by rank
+ * @param {Array} arr - The unsorted card hand
+ * @returns {Array} - Returns a sorted card hand
+ */
+function sort_card_slot_card(arr: Array<CardSlot>): Array<CardSlot> {
+    let sorted_arr = [...arr];
+
+    for (let i = 0; i < sorted_arr.length - 1; i++) {
+        let max_index = i;
+
+        //Finds the smallest value
+        for (let j = i + 1; j < sorted_arr.length; j++) {
+            if (sorted_arr[j].card !== null && sorted_arr[max_index].card !== null) {
+                if (sorted_arr[j].card!.value > sorted_arr[max_index].card!.value) {
+                    max_index = j;
+                }
+            }
+        }
+
+        // Swap the elements
+        if (max_index !== i) {
+            const temp_val = sorted_arr[i].card
+            sorted_arr[i].card = sorted_arr[max_index].card
+            sorted_arr[max_index].card = temp_val
+        }
+    }
+
+    return sorted_arr;
 }
 
 function play_cards(scene: Phaser.Scene): void {
