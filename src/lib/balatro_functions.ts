@@ -179,12 +179,12 @@ function boss_battle(rnd: number, arr: Array<Card>): void {
     function debuff_cards(attribute: Suit | String, card: Card): Card {
         if(attribute === "Face cards") {
             if (card.value >= 11 && card.value <= 13) {
-                card.chip_flat = 0
-                card.mult_flat = 0
+                card.chip = 0
+                card.mult = 0
             }
         } else if (card.suit === attribute as Suit) {
-            card.chip_flat = 0
-            card.mult_flat = 0
+            card.chip = 0
+            card.mult = 0
         }
         return card
     }
@@ -217,8 +217,8 @@ function update_deck_count(): void {
  * @returns {Array} - An array of the chip total and mult total
  */
 export function calculate_hand(arr: Array<Card>): Array<number> {
-    let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip_flat}, 0)
-    let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult_flat}, 0)
+    let chip_five_cards: number = arr.reduce((sum, card) => {return sum + card.chip}, 0)
+    let mult_five_cards: number = arr.reduce((sum, card) => {return sum + card.mult}, 0)
 
     const values: Array<number> = arr.map(arr => arr.value).sort((a, b) => a - b);
     const suits: Array<Suit> = arr.map(arr => arr.suit);
@@ -270,7 +270,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         }
             
         default:
-            return [arr[0].chip_flat + 5, arr[0].mult_flat + 1]
+            return [arr[0].chip + 5, arr[0].mult + 1]
     }
 
     // Calculates the chip total and mult total for certain cards
@@ -278,8 +278,8 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         let chip_tot: number = 0, mult_tot: number = 0
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].value === value) {
-                chip_tot += arr[i].chip_flat 
-                mult_tot += arr[i].mult_flat
+                chip_tot += arr[i].chip 
+                mult_tot += arr[i].mult
             }
         }
         return [chip_tot, mult_tot]
