@@ -631,6 +631,7 @@ function clear_played_hand(scene: Phaser.Scene): void {
 function reset_board(scene: Phaser.Scene): void {
     discard_counter = 4
     play_counter = 4
+    money += money_earned()
     score = 0
     round++
     is_boss_7 = false
@@ -650,7 +651,6 @@ function reset_board(scene: Phaser.Scene): void {
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
     })
-    money += money_earned()
 
     scene.time.delayedCall(1000, () => {
         update_left_panel()
