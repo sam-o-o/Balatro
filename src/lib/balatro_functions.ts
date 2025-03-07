@@ -540,7 +540,7 @@ function reset_board(scene: Phaser.Scene): void {
 }
 
 
-function money_earned(round:number): number {
+export function money_earned(): number {
     switch(round % 3) {
         case 1: //first round
             return 3
