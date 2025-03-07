@@ -540,14 +540,14 @@ function reset_board(scene: Phaser.Scene): void {
 }
 
 
-function money_earned(): number {
+function money_earned(round:number): number {
     switch(round % 3) {
-        case 0: 
-            return 5
-        case 1: 
-            return 4
-        case 2: 
+        case 1: //first round
             return 3
+        case 2: //second round
+            return 4
+        case 0: //boss round
+            return 5
     }
     return 0
 }
