@@ -768,11 +768,11 @@ function reset_board(scene: Phaser.Scene): void {
 function money_earned(rnd: number): number {
     switch(rnd % 3) {
         case 1: //Small blind
-            return 3
+            return 2
         case 2: //Big blind
-            return 4
+            return 3
         case 0: //Boss blind
-            return 5
+            return 4
     }
     return 0
 }
