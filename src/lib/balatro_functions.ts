@@ -514,7 +514,7 @@ function sort_card_slot_card(arr: Array<CardSlot>): Array<CardSlot> {
     for (let i = 0; i < sorted_arr.length - 1; i++) {
         let max_index = i;
 
-        //Finds the smallest value
+        //Finds the biggest value
         for (let j = i + 1; j < sorted_arr.length; j++) {
             if (sorted_arr[j].card !== null && sorted_arr[max_index].card !== null) {
                 if (sorted_arr[j].card!.value > sorted_arr[max_index].card!.value) {
