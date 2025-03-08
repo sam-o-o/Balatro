@@ -27,7 +27,7 @@ let blind_specific_color: number = 0x1445cc
 //Starting values
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
-let required_score: number = base_chip_req[1], round: number = 1, ante: number = 1
+let required_score: number = base_chip_req[1], round: number = 24, ante: number = 1
 let money: number = 0, extra_blind: number = 1
 let is_boss_7: boolean = false, type_boss: string, blind: string = "Small Blind"
 let own_joker_1: boolean = false
@@ -286,7 +286,7 @@ export function shuffle_cards<T>(arr: Array<T>): Stack<T> {
  * @param {number} rnd - The current round
  * @param {Array} arr - The deck to be modified
  */
-function boss_round_debuff<T>(rnd: number, arr: Array<Card>): void {
+function boss_round_debuff(rnd: number, arr: Array<Card>): void {
     arr.forEach(card => {
         if(isJoker(card))
             return
@@ -713,6 +713,10 @@ function clear_played_hand(scene: Phaser.Scene): void {
     poker_hand = "";
     update_left_panel()
     if (score >= required_score) {
+        if(round === 24) {
+            scene.add.image(700, 450, "won_game")
+            return
+        }
         reset_board(scene)
         scene.scene.start(scene_keys.shop)
     } else if (play_counter === 0) {
