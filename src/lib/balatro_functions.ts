@@ -57,6 +57,11 @@ const poker_hands = {
 
 //Create functions, creates the visuals
 
+/**
+ * Creates visual slots for jokers
+ * and adds jokers to the slots
+ * @param {Phaser.Scene} scene - The scene the function is used in
+ */
 export function create_joker_slots(scene: Phaser.Scene): void {
     for (let i = 0; i < 5; i++) {
         const x = startX + 30 + i * slotSpacing
@@ -73,23 +78,20 @@ export function create_joker_slots(scene: Phaser.Scene): void {
         slot.setStrokeStyle(2, 0x000000)  // Outline
         shop_card_slots.push(card_slot)  // Adding the position
 
-        if(is_joker(current_jokers[i]))
-        {
-            let joker = scene.add.image(card_slot.x, card_slot.y, current_jokers[i]?.image)
-            joker.setDisplaySize(sizes.card_width, sizes.card_height)
-            joker.setInteractive()
+        let joker = scene.add.image(card_slot.x, card_slot.y, current_jokers[i]?.image)
+        joker.setDisplaySize(sizes.card_width, sizes.card_height)
+        joker.setInteractive()
     
-            joker.on("pointerover", () => {
-                joker.setAlpha(0.95)
-                let desc = scene.add.image(1200, 150, current_jokers[i].description)
-                desc.setScale(1.1)
-            })
+        joker.on("pointerover", () => {
+            joker.setAlpha(0.95)
+            let desc = scene.add.image(1200, 150, current_jokers[i].description)
+            desc.setScale(1.1)
+        })
     
-            joker.on("pointerout", () => {
-                joker.setAlpha(1)
-                destroy_images_by_key(current_jokers[i], true, scene)
-            })
-        }
+        joker.on("pointerout", () => {
+            joker.setAlpha(1)
+            destroy_images_by_key(current_jokers[i], true, scene)
+        })
     }
 }
 
@@ -979,20 +981,20 @@ function is_joker(obj: any): obj is Joker {
 }
 
 /**
- * 
- * @param arr 
- * @param item 
- * @returns 
+ * Removes an element in a array
+ * @param {Array} arr - The array to be modified 
+ * @param {T} item - The element that should be removed
+ * @returns {Array} Returns a array without the removed element
  */
 function arr_remove<T>(arr: Array<T>, item: T): Array<T> {
     return arr_remove_at(arr, arr.indexOf(item))
 }
 
 /**
- * 
- * @param arr 
- * @param index 
- * @returns 
+ * Removes an element at a certain index in an array
+ * @param {Array} arr - The array to be modified 
+ * @param {number} index - Index of the element 
+ * @returns {Array} Returns a array without the removed element
  */
 function arr_remove_at<T>(arr: Array<T>, index: number): Array<T> {
     let temp_arr: Array<T> = [] 
@@ -1004,8 +1006,8 @@ function arr_remove_at<T>(arr: Array<T>, index: number): Array<T> {
 }
 
 /**
- * 
- * @returns 
+ * Returns the ammount of selected cards in card_slots
+ * @returns {number} Returns the ammount of selected card
  */
 function get_num_selected_slots(): number {
     return card_slots.filter(slot => slot.selected).length
