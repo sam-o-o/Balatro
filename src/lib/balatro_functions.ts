@@ -254,13 +254,13 @@ function arr_remove_at<T>(arr: Array<T>, index: number): Array<T> {
  * @precondition arr is not empty
  * @returns {Stack} - Returns a stack in which the deck is shuffled
  */
-export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
+export function shuffle_cards<T>(arr: Array<T>): Stack<T> {
     // Create a copy of the array to preserve the original
 
     if(arr.length === 0)
         return empty()
 
-    let shuffled_array = [...arr]; 
+    let shuffled_array: Array<T> = [...arr]; 
     
     // Fisher-Yates shuffle algorithm
     for (let i = shuffled_array.length - 1; i > 0; i--) {
@@ -268,10 +268,10 @@ export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
         [shuffled_array[i], shuffled_array[j]] = [shuffled_array[j], shuffled_array[i]]; // Swap elements
     }
 
-    boss_round_debuff(round, shuffled_array)
+    boss_round_debuff(round, shuffled_array as Array<Card>)
 
     // Convert the shuffled array to a stack and return it
-    let stack: Stack<Card | Joker> = empty<Card>()
+    let stack: Stack<T> = empty<T>()
     shuffled_array.forEach(card => {
         stack = push(card, stack)
     })
@@ -286,7 +286,7 @@ export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
  * @param {number} rnd - The current round
  * @param {Array} arr - The deck to be modified
  */
-function boss_round_debuff(rnd: number, arr: Array<Card>): void {
+function boss_round_debuff<T>(rnd: number, arr: Array<Card>): void {
     arr.forEach(card => {
         if(isJoker(card))
             return
@@ -636,7 +636,7 @@ function draw_cards(scene: Phaser.Scene): void {
 
 function clear_hand(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
-        destroy_images_by_key(card_slots[i].card, scene)
+        destroy_images_by_key(card_slots[i].card, false, scene)
     }
 }
 
@@ -727,10 +727,11 @@ function clear_played_hand(scene: Phaser.Scene): void {
 function reset_board(scene: Phaser.Scene): void {
     discard_counter = 4
     play_counter = 4
-    money += money_earned()
+    money += money_earned(round)
     score = 0
     round++
     is_boss_7 = false
+    type_boss = ""
     extra_blind = 1
     if (round % 3 === 0) {
         blind = "Boss blind"
@@ -747,7 +748,6 @@ function reset_board(scene: Phaser.Scene): void {
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
     })
-    money += money_earned(round)
 
     scene.time.delayedCall(1000, () => {
         update_left_panel()

@@ -71,7 +71,6 @@ export class PreloadScene extends Phaser.Scene {
     }
 
     public create(): void {
-        this.scene.start(scene_keys.gameboard)
-        //this.scene.start(scene_keys.title)
+        this.scene.start(scene_keys.title)
     }
 }

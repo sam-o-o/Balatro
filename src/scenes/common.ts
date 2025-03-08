@@ -69,7 +69,7 @@ export type CardSlot = {
 
 export const base_chip_req: Array<number> = [
     100, // 0
-    10, // 1
+    300, // 1
     800, // 2
     2000, // 3
     5000, // 4
