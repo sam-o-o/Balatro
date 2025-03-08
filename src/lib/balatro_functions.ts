@@ -27,7 +27,7 @@ let blind_specific_color: number = 0x1445cc
 //Starting values
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
-let required_score: number = base_chip_req[1], round: number = 24, ante: number = 1
+let required_score: number = base_chip_req[1], round: number = 1, ante: number = 1
 let money: number = 0, extra_blind: number = 1
 let is_boss_7: boolean = false, type_boss: string, blind: string = "Small Blind"
 let own_joker_1: boolean = false
