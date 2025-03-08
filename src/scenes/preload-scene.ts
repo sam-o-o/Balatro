@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
-import { scene_keys, deck, create_card, get_card_image_name, Suit, joker_deck } from './common'
+import { scene_keys, deck, create_card, get_card_image_name, Suit } from './common'
+import { joker_deck } from '../lib/balatro_functions'
 
 export class PreloadScene extends Phaser.Scene {
 

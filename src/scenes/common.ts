@@ -15,7 +15,7 @@ export const sizes = {
 
 let id: number = 1
 export function create_card(image: string,
-                            value: integer,
+                            value: number,
                             suit: Suit,
                             chip: number,
                             mult: number):Card {
@@ -45,8 +45,8 @@ export function get_card_image_name(suit: Suit, value: number): string {
 
 export type Card = {
     image: string,
-    id: integer,
-    value: integer,
+    id: number,
+    value: number,
     suit: Suit,
     chip: number,
     mult: number,
@@ -63,13 +63,13 @@ export type CardSlot = {
     card: Card | null,
     selected: boolean,
     disabled: boolean,
-    x: integer,
-    y: integer
+    x: number,
+    y: number
 }
 
 export const base_chip_req: Array<number> = [
     100, // 0
-    300, // 1
+    10, // 1
     800, // 2
     2000, // 3
     5000, // 4
@@ -80,4 +80,3 @@ export const base_chip_req: Array<number> = [
 ] as const
 
 export let deck: Array<Card> = []
-export let joker_deck: Array<Joker> = []
