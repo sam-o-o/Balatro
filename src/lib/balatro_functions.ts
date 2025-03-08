@@ -15,6 +15,7 @@ let joker_deck_stack: Stack<Joker>
 
 let shop_attribute_slot: CardSlot
 
+//For visuals
 const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
 const slotSpacing: number = 120  // Space between slots
@@ -22,6 +23,8 @@ const left_side_offset: number = 25
 const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
 const slotY: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
+
+//Starting values
 let discard_counter: number = 4, play_counter: number = 4
 let poker_hand: string, score: number = 0
 let required_score: number = base_chip_req[1], round: number = 1, ante: number = 1
@@ -34,7 +37,7 @@ let hand_counter: Phaser.GameObjects.Text, discard: Phaser.GameObjects.Text
 let chips: Phaser.GameObjects.Text, mult: Phaser.GameObjects.Text
 let type_of_hand: Phaser.GameObjects.Text, score_text: Phaser.GameObjects.Text
 let round_text: Phaser.GameObjects.Text, money_text: Phaser.GameObjects.Text
-let ante_text: Phaser.GameObjects.Text, boss_text: Phaser.GameObjects.Text
+let ante_text: Phaser.GameObjects.Text
 let required_score_text: Phaser.GameObjects.Text
 let deck_total_text: Phaser.GameObjects.Text
 let blind_text: Phaser.GameObjects.Text
@@ -60,7 +63,7 @@ function get_num_selected_slots(): number {
 * Takes the name associated with a preloaded audio file + scene, and plays the sound file
 * Sound file MUST be preloaded before calling function
 * @param {string} audio_name
-* @param {Phaser.Scene} scene
+* @param {Phaser.Scene} scene - The scene the function is used in 
 */
 export function play_sound(audio_name: string, scene: Phaser.Scene) {
     const sound = scene.sound.add(audio_name)
@@ -103,7 +106,12 @@ export function create_joker_slots(scene: Phaser.Scene): void {
     }
 }
 
-export function create_shop(scene: Phaser.Scene):void {
+/**
+ * Creates the shop visual scene, and next round
+ * button
+ * @param {Phaser.Scene} scene - The scene the function is used in
+ */
+export function create_shop(scene: Phaser.Scene): void {
     let next_round_button = scene.add.image(927, 705, "next_round_button")
     next_round_button.setScale(1.2)
     next_round_button.setInteractive()
@@ -243,6 +251,7 @@ function arr_remove_at<T>(arr: Array<T>, index: number): Array<T> {
 /**
  * Takes a deck and shuffles it to a stack
  * @param {Array} arr - An array of cards that represents the full deck 
+ * @precondition arr is not empty
  * @returns {Stack} - Returns a stack in which the deck is shuffled
  */
 export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
@@ -259,7 +268,7 @@ export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
         [shuffled_array[i], shuffled_array[j]] = [shuffled_array[j], shuffled_array[i]]; // Swap elements
     }
 
-    boss_battle(round, shuffled_array)
+    boss_round_debuff(round, shuffled_array)
 
     // Convert the shuffled array to a stack and return it
     let stack: Stack<Card | Joker> = empty<Card>()
@@ -270,7 +279,14 @@ export function shuffle_cards(arr: Array<Card | Joker>): Stack<Card | Joker> {
     return stack
 }
 
-function boss_battle(rnd: number, arr: Array<Card | Joker>): void {
+/**
+ * Gives the deck or other variables the right debuff
+ * for the boss and changes type_boss to give appropriate
+ * description
+ * @param {number} rnd - The current round
+ * @param {Array} arr - The deck to be modified
+ */
+function boss_round_debuff(rnd: number, arr: Array<Card>): void {
     arr.forEach(card => {
         if(isJoker(card))
             return
@@ -332,6 +348,7 @@ function boss_battle(rnd: number, arr: Array<Card | Joker>): void {
         return card
     }
 }
+
 export function create_deck_slot(scene: Phaser.Scene): void {
     const deck_image = scene.add.image(sizes.width - 100, card_slots[0].y + 30, "card_bg")
     deck_image.setDisplaySize(sizes.card_width, sizes.card_height)
@@ -350,7 +367,12 @@ function update_deck_count(): void {
 /**
  * Calculates a hands value based on the poker hands
  * base value and the cards value
+ * @example
+ * //returns [30, 4]
+ * calculate_hand([{image: "diamonds_12", id: 1, value: 12, suit: diamonds, chip: 10, mult:0}, 
+ *                 {image: "spades_12", id: 2, value: 12, suit: spades, chip: 10, mult:0 }])
  * @param {Array} arr - An array of cards that represents the played hand
+ * @precondition - arr is not empty
  * @returns {Array} - An array of the chip total and mult total
  */
 export function calculate_hand(arr: Array<Card>): Array<number> {
@@ -455,7 +477,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
 
 /**
  * Makes seven card slots and puts cards in them
- * @param {Phaser.scene} scene - The scene the function is used in 
+ * @param {Phaser.Scene} scene - The scene the function is used in 
  */
 export function create_played_hand_slots(scene: Phaser.Scene): void {
     for (let i = 0; i < 5; i++) {
@@ -475,7 +497,10 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
     }
 }
 
-
+/**
+ * Creates the seven card slots, visually and the type CardSlot
+ * @param {Phaser.Scene} scene - The scene the function is used in
+ */
 export function create_card_slots(scene: Phaser.Scene): void {
 
     deck_stack  = shuffle_cards(deck) as Stack<Card>
@@ -504,7 +529,7 @@ export function create_card_slots(scene: Phaser.Scene): void {
 
 /**
  * Creates the two buttons "Play hand" and "Discard"
- * @param {Phaser.scene} scene - The scene the function is used in  
+ * @param {Phaser.Scene} scene - The scene the function is used in  
  */
 export function create_hand_buttons(scene: Phaser.Scene): void {
     let hand_button_image: Phaser.GameObjects.Image
@@ -556,7 +581,7 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
 /**
  * For every empty card slots draws equal ammount
  * of cards and puts the in your hand
- * @param {Phaser.scene} scene - The scene the function is used in   
+ * @param {Phaser.Scene} scene - The scene the function is used in   
  */
 function draw_cards(scene: Phaser.Scene): void {
     for(let i = 0; i < num_slots; i++) {
@@ -566,39 +591,84 @@ function draw_cards(scene: Phaser.Scene): void {
             const card_slot: CardSlot = card_slots[i]
             const card: Card = top(deck_stack)
             deck_stack = pop(deck_stack)
-            const card_display = scene.add.image(card_slot.x, card_slot.y, card.image)
+            
             card_slot.card = card
-            card_display.setDisplaySize(sizes.card_width, sizes.card_height)
-            card_display.setInteractive()
-
-            card_display.on('pointerdown', () => {
-                let numSelectedSlots : number = get_num_selected_slots()
-
-                if(!card_slot.selected) {
-                    if(numSelectedSlots < 5){
-                        card_display.setPosition(card_slot.x, card_slot.y - 30)
-                        card_slot.selected = true
-                        play_sound("select_card", scene)
-                    }
-                }
-                else {
-                    card_display.setPosition(card_slot.x, card_slot.y)
-                    card_slot.selected = false
-                    play_sound("deselect_card", scene)
-                }
-            })
-
-            card_display.on("pointerover", () => {
-                card_display.setAlpha(0.8)
-            })
-
-            card_display.on('pointerout', () => {
-                card_display.setAlpha(1);
-            });
         }
+    }       
+    card_slots = sort_card_slot_card(card_slots)
+    clear_hand(scene)
+    for (let i = 0; i < num_slots; i++) {
+        const card_slot: CardSlot = card_slots[i]
+
+        const card_display = scene.add.image(card_slot.x, card_slot.y, card_slot.card!.image)
+        card_display.setDisplaySize(sizes.card_width, sizes.card_height)
+        card_display.setInteractive()
+
+        card_display.on('pointerdown', () => {
+            let numSelectedSlots : number = get_num_selected_slots()
+
+            if(!card_slot.selected) {
+                if(numSelectedSlots < 5){
+                    card_display.setPosition(card_slot.x, card_slot.y - 30)
+                    card_slot.selected = true
+                    play_sound("select_card", scene)
+                }
+            }
+            else {
+                card_display.setPosition(card_slot.x, card_slot.y)
+                card_slot.selected = false
+                play_sound("deselect_card", scene)
+            }
+        })
+
+        card_display.on("pointerover", () => {
+            card_display.setAlpha(0.8)
+        })
+
+        card_display.on('pointerout', () => {
+            card_display.setAlpha(1);
+        });
     }
+            
     update_deck_count()
     play_sound("draw_cards", scene)
+}
+
+function clear_hand(scene: Phaser.Scene): void {
+    for(let i = 0; i < num_slots; i++) {
+        destroy_images_by_key(card_slots[i].card, scene)
+    }
+}
+
+/**
+ * Using selection sort sorts a hand by rank
+ * @param {Array} arr - The unsorted card hand
+ * @returns {Array} - Returns a sorted card hand
+ */
+function sort_card_slot_card(arr: Array<CardSlot>): Array<CardSlot> {
+    let sorted_arr = [...arr];
+
+    for (let i = 0; i < sorted_arr.length - 1; i++) {
+        let max_index = i;
+
+        //Finds the biggest value
+        for (let j = i + 1; j < sorted_arr.length; j++) {
+            if (sorted_arr[j].card !== null && sorted_arr[max_index].card !== null) {
+                if (sorted_arr[j].card!.value > sorted_arr[max_index].card!.value) {
+                    max_index = j;
+                }
+            }
+        }
+
+        // Swap the elements
+        if (max_index !== i) {
+            const temp_val = sorted_arr[i].card
+            sorted_arr[i].card = sorted_arr[max_index].card
+            sorted_arr[max_index].card = temp_val
+        }
+    }
+
+    return sorted_arr;
 }
 
 function play_cards(scene: Phaser.Scene): void {
@@ -650,6 +720,10 @@ function clear_played_hand(scene: Phaser.Scene): void {
     }
 }
 
+/**
+ * Resets important values back to origin
+ * @param {Phaser.Scene} scene - The scene the function is used in
+ */
 function reset_board(scene: Phaser.Scene): void {
     discard_counter = 4
     play_counter = 4
@@ -673,6 +747,7 @@ function reset_board(scene: Phaser.Scene): void {
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
     })
+    money += money_earned(round)
 
     scene.time.delayedCall(1000, () => {
         update_left_panel()
@@ -680,14 +755,19 @@ function reset_board(scene: Phaser.Scene): void {
     })
 }
 
-
-export function money_earned(): number {
-    switch(round % 3) {
-        case 1: //first round
+/**
+ * Depending on what round returns how money earned
+ * @param {number} rnd - The round
+ * @preconditon rnd is a non-negative number
+ * @returns {number} - The ammount of money
+ */
+function money_earned(rnd: number): number {
+    switch(rnd % 3) {
+        case 1: //Small blind
             return 3
-        case 2: //second round
+        case 2: //Big blind
             return 4
-        case 0: //boss round
+        case 0: //Boss blind
             return 5
     }
     return 0
@@ -799,7 +879,7 @@ export function create_left_panel(scene: Phaser.Scene): void {
         fontSize: "40px"    
     })
 
-    boss_text = scene.add.text(190, 110, type_boss, {
+    scene.add.text(190, 110, type_boss, {
         fontSize: "23px"
     }).setOrigin(0.5, 0.5) 
     
