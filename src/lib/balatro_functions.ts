@@ -13,8 +13,6 @@ let current_jokers: Array<Joker> = []
 let deck_stack: Stack<Card>
 let joker_deck_stack: Stack<Joker>
 
-let shop_attribute_slot: CardSlot
-
 //For visuals
 const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
@@ -279,6 +277,13 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
             }
         }
     })
+    hand_button_image.on("pointerover", () => {
+        hand_button_image.setAlpha(0.8)
+    })
+
+    hand_button_image.on("pointerout", () => {
+        hand_button_image.setAlpha(1)
+    })
 
     // Discard button
     discard_button_image = scene.add.image(x + space_between_buttons, y, "discard_button")
@@ -296,6 +301,14 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
 
             }
         }
+    })
+
+    discard_button_image.on("pointerover", () => {
+        discard_button_image.setAlpha(0.8)
+    })
+
+    discard_button_image.on("pointerout", () => {
+        discard_button_image.setAlpha(1)
     })
 }
 
