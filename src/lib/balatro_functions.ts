@@ -848,7 +848,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         
         case poker_hands.four_of_a_kind: {
             let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 4)[0]
-            let chip_mult: Array<number> = get_chip_mult_tot(value, arr);
+            let chip_mult: Array<number> = get_chip_mult_total(value, arr);
             return [60 + chip_mult[0], 7 + chip_mult[1]]
         }
 
@@ -863,21 +863,21 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
             
         case poker_hands.three_of_a_kind: {
             let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 3)[0]
-            let chip_mult = get_chip_mult_tot(value, arr);
+            let chip_mult = get_chip_mult_total(value, arr);
             return [30 + chip_mult[0], 3 + chip_mult[1]]
         }
 
         case poker_hands.two_pair: {
             let pair_values = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 2)
-            let chip_mult_1 = get_chip_mult_tot(pair_values[0], arr);
-            let chip_mult_2 = get_chip_mult_tot(pair_values[1], arr);
+            let chip_mult_1 = get_chip_mult_total(pair_values[0], arr);
+            let chip_mult_2 = get_chip_mult_total(pair_values[1], arr);
 
             return [20 + chip_mult_1[0] + chip_mult_2[0], 2 + chip_mult_1[1] + chip_mult_2[1]];
         }
             
         case poker_hands.pair: {
             let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 2)[0]
-            let chip_mult = get_chip_mult_tot(value, arr);
+            let chip_mult = get_chip_mult_total(value, arr);
             return [10 + chip_mult[0], 2 + chip_mult[1]]
         }
             
@@ -886,15 +886,15 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     }
 
     // Calculates the chip total and mult total for certain cards
-    function get_chip_mult_tot(value: number, arr: Array<Card>): Array<number> {
-        let chip_tot: number = 0, mult_tot: number = 0
+    function get_chip_mult_total(value: number, arr: Array<Card>): Array<number> {
+        let chip_total: number = 0, mult_total: number = 0
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].value === value) {
-                chip_tot += arr[i].chip 
-                mult_tot += arr[i].mult
+                chip_total += arr[i].chip 
+                mult_total += arr[i].mult
             }
         }
-        return [chip_tot, mult_tot]
+        return [chip_total, mult_total]
     }
 
     //Returns the correct poker hand
