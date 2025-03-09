@@ -868,9 +868,9 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         }
 
         case poker_hands.two_pair: {
-            let pairValues = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
-            let chip_mult_1 = get_chip_mult_tot(pairValues[0], arr);
-            let chip_mult_2 = get_chip_mult_tot(pairValues[1], arr);
+            let pair_values = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
+            let chip_mult_1 = get_chip_mult_tot(pair_values[0], arr);
+            let chip_mult_2 = get_chip_mult_tot(pair_values[1], arr);
 
             return [20 + chip_mult_1[0] + chip_mult_2[0], 2 + chip_mult_1[1] + chip_mult_2[1]];
         }
