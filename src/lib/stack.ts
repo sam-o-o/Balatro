@@ -77,6 +77,12 @@ export function display_stack<T>(stck: Stack<T>): void {
     }
 }
 
+/**
+ * Gets the length of a stack.
+ * @template T type of all stack elements
+ * @param stck stack to count elements of
+ * @returns number - lenght of thestack
+ */
 export function stack_count<T>(stck: Stack<T>): number {
     let count = 0
     while(!is_empty(stck)) {
