@@ -6,17 +6,17 @@ import { GameScene } from './scenes/gameboard-scene'
 import { ShopScene } from './scenes/shop-scene'
 import { sizes } from './scenes/common'
 
-const gameCanvas = document.getElementById('gameCanvas') as HTMLCanvasElement
+const game_canvas = document.getElementById('gameCanvas') as HTMLCanvasElement
 
-const gameConfig: Phaser.Types.Core.GameConfig = {
+const game_config: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     width: sizes.width,
     height: sizes.height,
     pixelArt: true,
-    canvas: gameCanvas,
+    canvas: game_canvas,
     scene: [PreloadScene, Titlescene, GameScene, ShopScene]
 }
 
 window.onload = () => {
-    new Phaser.Game(gameConfig)
+    new Phaser.Game(game_config)
 }
