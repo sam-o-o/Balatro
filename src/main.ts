@@ -8,7 +8,7 @@ import { sizes } from './scenes/common'
 
 const game_canvas = document.getElementById('gameCanvas') as HTMLCanvasElement
 
-const gameConfig: Phaser.Types.Core.GameConfig = {
+const game_config: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     width: sizes.width,
     height: sizes.height,
@@ -18,5 +18,5 @@ const gameConfig: Phaser.Types.Core.GameConfig = {
 }
 
 window.onload = () => {
-    new Phaser.Game(gameConfig)
+    new Phaser.Game(game_config)
 }
