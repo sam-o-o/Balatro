@@ -109,7 +109,7 @@ export function create_shop(scene: Phaser.Scene): void {
     let shop_image = scene.add.image(580, sizes.height, "shop").setOrigin(0, 1)
     shop_image.setScale(1.2)
 
-    joker_deck_stack = shuffle_cards(joker_deck as Array<Joker>) as Stack<Joker>
+    joker_deck_stack = shuffle_cards(joker_deck as Array<Joker>, round) as Stack<Joker>
 
     let desc_x: number = 825
     let desc_y: number = 288
@@ -221,7 +221,7 @@ export function create_played_hand_slots(scene: Phaser.Scene): void {
  */
 export function create_card_slots(scene: Phaser.Scene): void {
 
-    deck_stack  = shuffle_cards(deck) as Stack<Card>
+    deck_stack  = shuffle_cards(deck, round) as Stack<Card>
 
     for (let i = 0; i < num_slots; i++) {
         const x = startX + i * slotSpacing
@@ -654,7 +654,7 @@ function reset_board(scene: Phaser.Scene): void {
     if(round % 3 === 1)
         ante++
     required_score = base_chip_req[ante] * (1 + ((round - 1) % 3) * 0.5) * extra_blind
-    deck_stack = shuffle_cards(deck) as Stack<Card>
+    deck_stack = shuffle_cards(deck, round) as Stack<Card>
     card_slots.forEach(card_slot => {
         remove_card(scene, card_slot)
     })
@@ -722,7 +722,7 @@ function destroy_images_by_key(card: Card | Joker | null, is_desc: boolean, scen
  * @precondition arr is not empty
  * @returns {Stack} - Returns a stack in which the deck is shuffled
  */
-export function shuffle_cards<T>(arr: Array<T>): Stack<T> {
+export function shuffle_cards<T>(arr: Array<T>, rnd: number): Stack<T> {
     // Create a copy of the array to preserve the original
 
     if(arr.length === 0)
@@ -736,7 +736,7 @@ export function shuffle_cards<T>(arr: Array<T>): Stack<T> {
         [shuffled_array[i], shuffled_array[j]] = [shuffled_array[j], shuffled_array[i]]; // Swap elements
     }
 
-    boss_round_debuff(round, shuffled_array as Array<Card>)
+    boss_round_debuff(rnd, shuffled_array as Array<Card>)
 
     // Convert the shuffled array to a stack and return it
     let stack: Stack<T> = empty<T>()
