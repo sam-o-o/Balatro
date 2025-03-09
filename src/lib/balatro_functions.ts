@@ -16,10 +16,10 @@ let joker_deck_stack: Stack<Joker>
 //For visuals
 const num_slots: number = 7 // Number of slots
 const panel_width: number = 330
-const slotSpacing: number = 120  // Space between slots
+const slot_spacing: number = 120  // Space between slots
 const left_side_offset: number = 25
-const startX: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
-const slotY: number = sizes.height - 200  // Position near bottom
+const start_x: number = left_side_offset * 2 + panel_width + sizes.card_width / 2 // Center slots
+const slot_y: number = sizes.height - 200  // Position near bottom
 let blind_specific_color: number = 0x1445cc
 
 //Starting values
@@ -62,7 +62,7 @@ const poker_hands = {
  */
 export function create_joker_slots(scene: Phaser.Scene): void {
     for (let i = 0; i < 5; i++) {
-        const x = startX + 30 + i * slotSpacing
+        const x = start_x + 30 + i * slot_spacing
         const y = 150
         let card_slot: CardSlot = {
             card: null,
@@ -115,7 +115,7 @@ export function create_shop(scene: Phaser.Scene): void {
     let desc_y: number = 288
 
     for (let i = 0; i < 2; i++) {
-        const x = 735 + i * (slotSpacing + 70)
+        const x = 735 + i * (slot_spacing + 70)
         const y = 510
         let card_slot: CardSlot = {
             card: null,
@@ -199,7 +199,7 @@ export function create_deck_slot(scene: Phaser.Scene): void {
  */
 export function create_played_hand_slots(scene: Phaser.Scene): void {
     for (let i = 0; i < 5; i++) {
-        const x = startX + i * 130 + 100
+        const x = start_x + i * 130 + 100
         const y = sizes.height / 2
         let played_slot: CardSlot = {
             card: null,
@@ -224,8 +224,8 @@ export function create_card_slots(scene: Phaser.Scene): void {
     deck_stack  = shuffle_cards(deck, round) as Stack<Card>
 
     for (let i = 0; i < num_slots; i++) {
-        const x = startX + i * slotSpacing
-        const y = slotY
+        const x = start_x + i * slot_spacing
+        const y = slot_y
         let card_slot: CardSlot = {
             card: null,
             selected: false,
@@ -253,8 +253,8 @@ export function create_hand_buttons(scene: Phaser.Scene): void {
     let hand_button_image: Phaser.GameObjects.Image
     let discard_button_image: Phaser.GameObjects.Image
 
-    const x = startX + 3 * slotSpacing
-    const y = slotY + 140
+    const x = start_x + 3 * slot_spacing
+    const y = slot_y + 140
     const space_between_buttons: number = 80
 
     // Play hand button
@@ -515,10 +515,10 @@ function draw_cards(scene: Phaser.Scene): void {
         card_display.setInteractive()
 
         card_display.on('pointerdown', () => {
-            let numSelectedSlots : number = get_num_selected_slots()
+            let num_selected_slots : number = get_num_selected_slots()
 
             if(!card_slot.selected) {
-                if(numSelectedSlots < 5){
+                if(num_selected_slots < 5){
                     card_display.setPosition(card_slot.x, card_slot.y - 30)
                     card_slot.selected = true
                     play_sound("select_card", scene)
@@ -835,8 +835,8 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
     const values: Array<number> = arr.map(arr => arr.value).sort((a, b) => a - b);
     const suits: Array<Suit> = arr.map(arr => arr.suit);
 
-    const valueCounts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
-    const counts: Array<number> = Object.values(valueCounts).sort((a, b) => b - a);
+    const value_counts: Record<number, number> = values.reduce((acc, v) => ((acc[v] = (acc[v] || 0) + 1), acc), {} as Record<number, number>);
+    const counts: Array<number> = Object.values(value_counts).sort((a, b) => b - a);
 
     poker_hand = get_poker_hand(arr); 
 
@@ -847,7 +847,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         }
         
         case poker_hands.four_of_a_kind: {
-            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 4)[0]
+            let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 4)[0]
             let chip_mult: Array<number> = get_chip_mult_tot(value, arr);
             return [60 + chip_mult[0], 7 + chip_mult[1]]
         }
@@ -862,13 +862,13 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
             return [30 + chip_five_cards, 4 + mult_five_cards]
             
         case poker_hands.three_of_a_kind: {
-            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 3)[0]
+            let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 3)[0]
             let chip_mult = get_chip_mult_tot(value, arr);
             return [30 + chip_mult[0], 3 + chip_mult[1]]
         }
 
         case poker_hands.two_pair: {
-            let pair_values = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)
+            let pair_values = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 2)
             let chip_mult_1 = get_chip_mult_tot(pair_values[0], arr);
             let chip_mult_2 = get_chip_mult_tot(pair_values[1], arr);
 
@@ -876,7 +876,7 @@ export function calculate_hand(arr: Array<Card>): Array<number> {
         }
             
         case poker_hands.pair: {
-            let value = Object.keys(valueCounts).map(Number).filter(v => valueCounts[v] === 2)[0]
+            let value = Object.keys(value_counts).map(Number).filter(v => value_counts[v] === 2)[0]
             let chip_mult = get_chip_mult_tot(value, arr);
             return [10 + chip_mult[0], 2 + chip_mult[1]]
         }
