@@ -694,7 +694,7 @@ function destroy_images_by_key(card: Card | Joker | null, is_desc: boolean, scen
             key = card.image
     }
 
-    scene.children.list.forEach((child) => {
+    scene.children.list.forEach((child: Phaser.GameObjects.GameObject) => {
         if (child instanceof Phaser.GameObjects.Image && child.texture.key === key) {
             child.destroy()
         }
@@ -970,13 +970,18 @@ function money_earned(rnd: number): number {
  * @param {Joker} obj - 
  * @returns {Boolean} - True if it is a joker
  */
-function is_joker(obj: any): obj is Joker {
+function is_joker(obj: unknown): obj is Joker {
+    if (typeof obj !== "object" || obj === null) {
+        return false;
+    }
+
+    const candidate = obj as Joker; // Type assertion to safely check properties
+
     return (
-        obj &&
-        typeof obj.id === "number" &&
-        typeof obj.image === "string" &&
-        typeof obj.price === "number" &&
-        typeof obj.description === "string"
+        typeof candidate.id === "number" &&
+        typeof candidate.image === "string" &&
+        typeof candidate.price === "number" &&
+        typeof candidate.description === "string"
     );
 }
 
